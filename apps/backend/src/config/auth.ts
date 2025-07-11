@@ -1,4 +1,4 @@
-import { ClerkExpressWithAuth } from '@clerk/backend';
+import { clerkMiddleware, requireAuth } from '@clerk/backend';
 import { Request, Response, NextFunction } from 'express';
 import { logger } from '@/config/logger';
 
@@ -14,9 +14,7 @@ if (!clerkConfig.secretKey || !clerkConfig.publishableKey) {
 }
 
 // Middleware de autenticación con Clerk
-export const clerkAuth = ClerkExpressWithAuth({
-  secretKey: clerkConfig.secretKey,
-});
+export const clerkAuth = clerkMiddleware();
 
 // Interfaz para el usuario autenticado
 export interface AuthenticatedUser {
@@ -25,7 +23,7 @@ export interface AuthenticatedUser {
   firstName?: string;
   lastName?: string;
   imageUrl?: string;
-  organizationId?: string;
+  organizationId?: string | undefined;
   role?: string;
 }
 
@@ -74,7 +72,7 @@ export const extractUserInfo = async (
 };
 
 // Middleware para verificar que el usuario esté autenticado
-export const requireAuth = (
+export const requireAuthMiddleware = (
   req: Request,
   res: Response,
   next: NextFunction
@@ -101,7 +99,7 @@ export const requireRole = (roles: string[]) => {
       });
     }
     
-    next();
+    return next();
   };
 };
 
