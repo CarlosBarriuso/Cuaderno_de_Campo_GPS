@@ -1,0 +1,76 @@
+{
+  "expo": {
+    "name": "Cuaderno de Campo GPS",
+    "slug": "cuaderno-campo-gps",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#22c55e"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.cuadernocampo.gps",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "Esta app necesita acceso a tu ubicación para registrar actividades agrícolas con coordenadas GPS precisas.",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "Esta app necesita acceso a tu ubicación para registrar actividades agrícolas con coordenadas GPS precisas.",
+        "NSCameraUsageDescription": "Esta app necesita acceso a la cámara para capturar fotos de actividades y productos agrícolas.",
+        "NSPhotoLibraryUsageDescription": "Esta app necesita acceso a la galería de fotos para seleccionar imágenes de actividades agrícolas."
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#22c55e"
+      },
+      "package": "com.cuadernocampo.gps",
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "CAMERA",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE"
+      ]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Esta app necesita acceso a tu ubicación para registrar actividades agrícolas con coordenadas GPS precisas."
+        }
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Esta app necesita acceso a la cámara para capturar fotos de actividades y productos agrícolas."
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Esta app necesita acceso a la galería de fotos para seleccionar imágenes de actividades agrícolas."
+        }
+      ]
+    ],
+    "scheme": "cuaderno-campo-gps",
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "your-eas-project-id"
+      }
+    }
+  }
+}

@@ -1,0 +1,65 @@
+{
+  "name": "cuaderno-campo-gps",
+  "version": "1.0.0",
+  "description": "Sistema integral de gestión agrícola con GPS para registro de actividades de campo",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev --parallel",
+    "dev:backend": "npm run dev --workspace=apps/backend",
+    "dev:web": "npm run dev --workspace=apps/web", 
+    "dev:mobile": "npm run dev --workspace=apps/mobile",
+    "lint": "turbo run lint",
+    "lint:fix": "turbo run lint:fix",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
+    "test": "turbo run test",
+    "test:unit": "turbo run test:unit",
+    "test:e2e": "turbo run test:e2e",
+    "test:coverage": "turbo run test:coverage",
+    "clean": "turbo run clean && rm -rf node_modules",
+    "db:migrate": "npm run db:migrate --workspace=apps/backend",
+    "db:generate": "npm run db:generate --workspace=apps/backend",
+    "db:seed": "npm run db:seed --workspace=apps/backend",
+    "db:studio": "npm run db:studio --workspace=apps/backend",
+    "db:reset": "npm run db:reset --workspace=apps/backend",
+    "type-check": "turbo run type-check",
+    "docker:dev": "docker-compose -f docker-compose.dev.yml up -d",
+    "docker:down": "docker-compose -f docker-compose.dev.yml down",
+    "docker:logs": "docker-compose -f docker-compose.dev.yml logs -f"
+  },
+  "devDependencies": {
+    "@turbo/gen": "^1.10.12",
+    "turbo": "^1.10.12",
+    "prettier": "^3.0.0",
+    "eslint": "^8.48.0",
+    "typescript": "^5.2.2"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
+  "packageManager": "npm@9.8.1",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/CarlosBarriuso/Cuaderno_de_Campo_GPS.git"
+  },
+  "keywords": [
+    "agricultura",
+    "gps",
+    "parcelas",
+    "actividades",
+    "pac",
+    "sigpac",
+    "monorepo",
+    "nextjs",
+    "react-native",
+    "postgresql",
+    "postgis"
+  ],
+  "author": "Carlos Barriuso",
+  "license": "MIT"
+}

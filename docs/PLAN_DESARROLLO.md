@@ -16,9 +16,11 @@ Crear la base funcional del sistema con las características mínimas viables.
 
 #### Backend (2 semanas)
 - [x] Estructura base del proyecto (Ya existe)
-- [ ] API REST básica con autenticación Clerk
-- [ ] Modelo de datos inicial (usuarios, parcelas, actividades)
-- [ ] Base de datos PostgreSQL + PostGIS setup
+- [x] API REST básica con autenticación Clerk
+- [x] Modelo de datos inicial (usuarios, parcelas, actividades)
+- [x] Base de datos PostgreSQL + PostGIS setup
+- [x] Prisma Client configurado con PostGIS
+- [x] Docker Compose para desarrollo local
 - [ ] CRUD básico para parcelas y actividades
 - [ ] Middleware de validación y error handling
 
@@ -31,8 +33,11 @@ Crear la base funcional del sistema con las características mínimas viables.
 - [ ] Mapa básico con Leaflet para visualizar parcelas
 
 #### App Móvil (2 semanas)
-- [ ] Setup React Native + Expo
-- [ ] Autenticación sincronizada con web
+- [x] Setup React Native + Expo
+- [x] Autenticación sincronizada con web (Clerk)
+- [x] Estructura de navegación con tabs
+- [x] Dashboard principal con métricas
+- [x] Componentes UI especializados agricultura
 - [ ] Captura de ubicación GPS
 - [ ] Formulario de registro de actividades
 - [ ] Sincronización básica con backend

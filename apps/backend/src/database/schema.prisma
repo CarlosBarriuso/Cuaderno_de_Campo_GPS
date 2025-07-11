@@ -1,0 +1,340 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Modelo de Usuario (sincronizado con Clerk)
+model User {
+  id               String    @id @default(cuid())
+  clerkId          String    @unique // ID de Clerk
+  email            String    @unique
+  firstName        String?
+  lastName         String?
+  imageUrl         String?
+  organizationId   String?
+  role             UserRole  @default(AGRICULTOR)
+  
+  // Metadatos
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  lastLoginAt      DateTime?
+  
+  // Relaciones
+  parcelas         Parcela[]
+  actividades      Actividad[]
+  organizacion     Organizacion? @relation(fields: [organizationId], references: [id])
+  
+  @@map("users")
+}
+
+enum UserRole {
+  AGRICULTOR
+  TECNICO
+  ADMIN_COOPERATIVA
+  SUPER_ADMIN
+}
+
+// Modelo de Organización (Cooperativas, Sociedades)
+model Organizacion {
+  id               String    @id @default(cuid())
+  nombre           String
+  tipo             TipoOrganizacion
+  cif              String?   @unique
+  direccion        String?
+  telefono         String?
+  email            String?
+  
+  // Configuración
+  configuracion    Json?     // Configuraciones específicas de la organización
+  
+  // Metadatos
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  
+  // Relaciones
+  usuarios         User[]
+  
+  @@map("organizaciones")
+}
+
+enum TipoOrganizacion {
+  INDIVIDUAL
+  COOPERATIVA
+  SOCIEDAD_AGRARIA
+  EMPRESA_SERVICIOS
+}
+
+// Modelo de Parcela con datos geoespaciales
+model Parcela {
+  id               String    @id @default(cuid())
+  nombre           String
+  descripcion      String?
+  superficie       Float     // En hectáreas
+  
+  // Datos geoespaciales (PostGIS)
+  geometria        String    // Almacenado como WKT (Well-Known Text)
+  centroide        String?   // Punto central calculado
+  
+  // Datos agrícolas
+  cultivo          String
+  tipoCultivo      TipoCultivo
+  variedad         String?
+  tipoSuelo        TipoSuelo?
+  ph               Float?
+  pendiente        Float?
+  sistemaRiego     SistemaRiego @default(SECANO)
+  
+  // Referencias oficiales
+  referenciaSigpac String?   @unique
+  referenciaXunta  String?
+  
+  // Certificaciones
+  certificaciones  String[]  // Array de certificaciones (ecológico, etc.)
+  
+  // Propietario
+  propietarioId    String
+  propietario      User      @relation(fields: [propietarioId], references: [id], onDelete: Cascade)
+  
+  // Estado
+  activa           Boolean   @default(true)
+  ultimaActividad  DateTime?
+  
+  // Metadatos
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  
+  // Relaciones
+  actividades      Actividad[]
+  
+  @@map("parcelas")
+  @@index([propietarioId])
+  @@index([tipoCultivo])
+  @@index([referenciaSigpac])
+}
+
+enum TipoCultivo {
+  CEREAL_SECANO
+  CEREAL_REGADIO
+  LEGUMINOSA
+  OLEAGINOSA
+  CULTIVO_INDUSTRIAL
+  FRUTAL_HUESO
+  FRUTAL_PEPITA
+  CITRICO
+  FRUTO_SECO
+  VINEDO
+  OLIVAR
+  HORTALIZA_AIRE_LIBRE
+  HORTALIZA_INVERNADERO
+  FORRAGE
+  OTRO
+}
+
+enum TipoSuelo {
+  ARCILLOSO
+  ARENOSO
+  FRANCO
+  FRANCO_ARCILLOSO
+  FRANCO_ARENOSO
+  LIMOSO
+  OTRO
+}
+
+enum SistemaRiego {
+  SECANO
+  GOTEO
+  ASPERSION
+  MICROASPERSION
+  GRAVEDAD
+  PIVOT
+  OTRO
+}
+
+// Modelo de Actividad Agrícola
+model Actividad {
+  id               String    @id @default(cuid())
+  tipo             TipoActividad
+  fecha            DateTime
+  
+  // Ubicación GPS
+  coordenadas      Float[]   // [latitud, longitud]
+  precision        Float?    // Precisión del GPS en metros
+  
+  // Parcela asociada
+  parcelaId        String
+  parcela          Parcela   @relation(fields: [parcelaId], references: [id], onDelete: Cascade)
+  
+  // Datos específicos de la actividad
+  productos        Json[]    // Array de productos utilizados
+  maquinaria       String?   // Maquinaria utilizada
+  notas            String?
+  
+  // Condiciones ambientales
+  condicionesMeteorologicas Json? // Datos del clima en el momento
+  
+  // Archivos adjuntos
+  fotos            String[]  // URLs de fotos
+  documentos       String[]  // URLs de documentos
+  
+  // Datos de OCR (si aplica)
+  ocrData          Json?     // Datos extraídos por OCR
+  
+  // Validaciones
+  validaciones     Json?     // Resultados de validaciones automáticas
+  alertas          String[]  // Alertas generadas
+  
+  // Usuario que registra
+  usuarioId        String
+  usuario          User      @relation(fields: [usuarioId], references: [id])
+  
+  // Estado
+  estado           EstadoActividad @default(COMPLETADA)
+  
+  // Metadatos
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  
+  @@map("actividades")
+  @@index([parcelaId])
+  @@index([usuarioId])
+  @@index([tipo])
+  @@index([fecha])
+}
+
+enum TipoActividad {
+  // Preparación del terreno
+  ARADO
+  CULTIVADO
+  GRADA
+  SUBSOLADO
+  NIVELACION
+  
+  // Siembra/Plantación
+  SIEMBRA
+  PLANTACION
+  TRASPLANTE
+  
+  // Fertilización
+  ABONADO_FONDO
+  COBERTERA
+  FERTIRRIGACION
+  ABONO_FOLIAR
+  
+  // Tratamientos
+  HERBICIDA
+  FUNGICIDA
+  INSECTICIDA
+  ACARICIDA
+  BACTERICIDA
+  
+  // Riego
+  RIEGO
+  INSTALACION_RIEGO
+  MANTENIMIENTO_RIEGO
+  
+  // Mantenimiento cultivo
+  PODA
+  ACLAREO
+  DESHOJE
+  INJERTO
+  
+  // Cosecha
+  COSECHA
+  RECOLECCION
+  
+  // Otros
+  ANALISIS_SUELO
+  CONTROL_PLAGAS
+  OBSERVACION
+  MANTENIMIENTO
+  OTRO
+}
+
+enum EstadoActividad {
+  PLANIFICADA
+  EN_CURSO
+  COMPLETADA
+  CANCELADA
+}
+
+// Modelo de Producto (Catálogo)
+model Producto {
+  id               String    @id @default(cuid())
+  nombreComercial  String
+  principioActivo  String?
+  tipo             TipoProducto
+  fabricante       String?
+  
+  // Información técnica
+  concentracion    String?
+  numeroRegistro   String?   @unique
+  usos             String[]  // Cultivos para los que está autorizado
+  dosisRecomendada String?
+  plazoSeguridad   Int?      // Días antes de cosecha
+  
+  // Clasificación
+  clasificacion    String?   // Toxicología, etc.
+  restricciones    String[]  // Restricciones de uso
+  
+  // Metadatos
+  activo           Boolean   @default(true)
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  
+  @@map("productos")
+  @@index([tipo])
+  @@index([numeroRegistro])
+}
+
+enum TipoProducto {
+  SEMILLA
+  FERTILIZANTE
+  HERBICIDA
+  FUNGICIDA
+  INSECTICIDA
+  ACARICIDA
+  REGULADOR_CRECIMIENTO
+  OTRO
+}
+
+// Modelo de Precio de Mercado
+model PrecioMercado {
+  id               String    @id @default(cuid())
+  cultivo          String
+  variedad         String?
+  precio           Float     // Precio por unidad
+  unidad           String    // kg, tonelada, etc.
+  
+  // Localización
+  region           String?
+  mercado          String?   // Lonja, mercado específico
+  
+  // Metadatos
+  fecha            DateTime
+  fuente           String    // Origen del precio
+  
+  createdAt        DateTime  @default(now())
+  
+  @@map("precios_mercado")
+  @@index([cultivo])
+  @@index([fecha])
+}
+
+// Modelo de Configuración del Sistema
+model ConfiguracionSistema {
+  id               String    @id @default(cuid())
+  clave            String    @unique
+  valor            Json
+  descripcion      String?
+  
+  updatedAt        DateTime  @updatedAt
+  
+  @@map("configuracion_sistema")
+}

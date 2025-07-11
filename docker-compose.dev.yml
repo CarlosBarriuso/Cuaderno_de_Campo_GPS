@@ -1,0 +1,82 @@
+version: '3.8'
+
+services:
+  # PostgreSQL con PostGIS para desarrollo
+  postgres:
+    image: postgis/postgis:16-3.4
+    container_name: cuaderno_campo_postgres
+    environment:
+      POSTGRES_DB: cuaderno_campo_dev
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=es_ES.UTF-8"
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./tools/database/init:/docker-entrypoint-initdb.d
+    networks:
+      - cuaderno_campo_network
+    command: >
+      postgres -c log_statement=all
+               -c log_destination=stderr
+               -c log_min_messages=info
+               -c shared_preload_libraries=postgis-3
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d cuaderno_campo_dev"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # Redis para caché y sesiones
+  redis:
+    image: redis:7-alpine
+    container_name: cuaderno_campo_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - cuaderno_campo_network
+    command: redis-server --appendonly yes --requirepass "redispass"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+    restart: unless-stopped
+
+  # PgAdmin para administración de la base de datos (opcional)
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: cuaderno_campo_pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@cuadernocampo.local
+      PGADMIN_DEFAULT_PASSWORD: admin123
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    ports:
+      - "8080:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    networks:
+      - cuaderno_campo_network
+    depends_on:
+      postgres:
+        condition: service_healthy
+    profiles:
+      - admin
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  pgadmin_data:
+    driver: local
+
+networks:
+  cuaderno_campo_network:
+    driver: bridge
+    name: cuaderno_campo_network

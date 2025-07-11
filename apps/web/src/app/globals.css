@@ -44,14 +44,15 @@
 }
 
 :root {
-  --radius: 0.625rem;
+  --radius: 0.75rem;
+  /* Tema agrícola con colores verde tierra */
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
+  --primary: oklch(0.56 0.19 142); /* Verde agricultura */
   --primary-foreground: oklch(0.985 0 0);
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);
@@ -62,20 +63,22 @@
   --destructive: oklch(0.577 0.245 27.325);
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
+  --ring: oklch(0.56 0.19 142);
+  /* Colores para gráficos agrícolas */
+  --chart-1: oklch(0.56 0.19 142); /* Verde siembra */
+  --chart-2: oklch(0.6 0.118 184.704); /* Azul fertilización */
+  --chart-3: oklch(0.7 0.15 85); /* Naranja tratamiento */
+  --chart-4: oklch(0.577 0.245 27.325); /* Rojo cosecha */
+  --chart-5: oklch(0.69 0.118 194); /* Cyan riego */
+  /* Sidebar con tema agrícola */
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
+  --sidebar-primary: oklch(0.56 0.19 142);
   --sidebar-primary-foreground: oklch(0.985 0 0);
   --sidebar-accent: oklch(0.97 0 0);
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --sidebar-ring: oklch(0.56 0.19 142);
 }
 
 .dark {
@@ -118,5 +121,57 @@
   }
   body {
     @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-semibold tracking-tight;
+  }
+}
+
+@layer components {
+  /* Componentes personalizados para agricultura */
+  .agriculture-gradient {
+    background: linear-gradient(135deg, oklch(0.96 0.02 142) 0%, oklch(0.92 0.03 142) 100%);
+  }
+  
+  .earth-gradient {
+    background: linear-gradient(135deg, oklch(0.96 0.02 85) 0%, oklch(0.92 0.03 85) 100%);
+  }
+  
+  .metric-card {
+    @apply rounded-xl border border-border/50 bg-card p-6 shadow-sm transition-all hover:shadow-md;
+  }
+  
+  .sidebar-item {
+    @apply flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors hover:bg-accent;
+  }
+  
+  .sidebar-item.active {
+    @apply bg-primary/10 text-primary;
+  }
+  
+  .activity-indicator {
+    @apply inline-flex h-2 w-2 rounded-full;
+  }
+  
+  .activity-indicator.siembra {
+    background-color: oklch(var(--chart-1));
+  }
+  
+  .activity-indicator.fertilizacion {
+    background-color: oklch(var(--chart-2));
+  }
+  
+  .activity-indicator.tratamiento {
+    background-color: oklch(var(--chart-3));
+  }
+  
+  .activity-indicator.cosecha {
+    background-color: oklch(var(--chart-4));
+  }
+  
+  .activity-indicator.riego {
+    background-color: oklch(var(--chart-5));
   }
 }

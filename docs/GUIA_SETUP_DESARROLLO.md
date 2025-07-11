@@ -122,55 +122,12 @@ EXPO_PUBLIC_ENABLE_GPS_SIMULATION=true
 ### 3. Base de Datos Local con Docker
 
 ```bash
-# Crear docker-compose.dev.yml
-cat > docker-compose.dev.yml << EOF
-version: '3.8'
-
-services:
-  postgres:
-    image: postgis/postgis:13-3.1
-    container_name: cuaderno-campo-postgres
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: cuaderno_campo_dev
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./database/init:/docker-entrypoint-initdb.d
-    command: >
-      postgres -c log_statement=all
-               -c log_destination=stderr
-               -c log_min_messages=info
-
-  redis:
-    image: redis:7-alpine
-    container_name: cuaderno-campo-redis
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis_data:/data
-    command: redis-server --appendonly yes
-
-  pgadmin:
-    image: dpage/pgadmin4:latest
-    container_name: cuaderno-campo-pgadmin
-    environment:
-      PGADMIN_DEFAULT_EMAIL: admin@cuadernocampo.local
-      PGADMIN_DEFAULT_PASSWORD: admin
-    ports:
-      - "5050:80"
-    volumes:
-      - pgadmin_data:/var/lib/pgadmin
-    depends_on:
-      - postgres
-
-volumes:
-  postgres_data:
-  redis_data:
-  pgadmin_data:
-EOF
+# ✅ COMPLETADO - Docker Compose ya configurado
+# El archivo docker-compose.dev.yml ya existe con:
+# - PostgreSQL 16 + PostGIS 3.4
+# - Redis con autenticación
+# - PgAdmin con perfiles opcionales
+# - Scripts de inicialización PostGIS
 
 # Levantar servicios de desarrollo
 docker-compose -f docker-compose.dev.yml up -d
@@ -181,12 +138,13 @@ docker-compose -f docker-compose.dev.yml up -d
 ```bash
 # Generar y ejecutar migraciones
 cd apps/backend
-npm run db:generate
-npm run db:migrate
-npm run db:seed
+npm install                    # Instalar dependencias
+npm run db:generate           # ✅ COMPLETADO - Generar Prisma client
+npm run db:migrate            # Ejecutar migraciones de BD
+npm run db:seed               # Poblar datos iniciales
 
 # Verificar instalación de PostGIS
-npm run db:check-postgis
+npm run db:check-postgis      # Verificar PostGIS funcional
 ```
 
 #### Script de verificación PostGIS
