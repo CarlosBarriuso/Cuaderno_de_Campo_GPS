@@ -29,9 +29,11 @@ const finalTechStack = {
   
   // Frontend Web
   framework: 'Next.js 14 (App Router)',
-  ui: 'Tailwind CSS + Shadcn/ui',
+  ui: 'Plantilla Isomorphic + RizzUI + Tailwind CSS',
+  components: 'Recharts + HeadlessUI + HeroIcons',
   state: 'Zustand + React Query',
   maps: 'Leaflet + OpenStreetMap',
+  theme: 'Tema agrícola personalizado (verde/tierra)',
   
   // Mobile
   framework: 'React Native + Expo',
@@ -213,6 +215,14 @@ Testing específico por cultivo:
 - **Database**: Prisma Studio + PgAdmin
 - **Monitoring**: Health checks + métricas custom
 
+### ✅ Frontend con Plantilla Isomorphic
+**DECISIÓN**: Usar plantilla Isomorphic como base del frontend web
+- **Compatibilidad**: 100% compatible con Next.js 14 + TypeScript + Tailwind
+- **Componentes**: Dashboard profesional + Recharts + formularios avanzados
+- **Tema personalizado**: Paleta verde/tierra para aplicación agrícola
+- **Aceleración**: 4-6 semanas ahorradas en desarrollo UI
+- **Costo**: ~$50 licencia vs weeks de desarrollo custom
+
 ## Próximos Pasos Inmediatos
 
 ### 🚀 Implementación Fase 1
@@ -227,11 +237,12 @@ Testing específico por cultivo:
    - Modelos Prisma + migraciones
    - Testing infrastructure
 
-3. **Frontend web MVP** (2 semanas)
-   - Dashboard básico
-   - Gestión parcelas
-   - Mapa con Leaflet
-   - Integración autenticación
+3. **Frontend web MVP con Isomorphic** (1.5 semanas)
+   - Configurar plantilla Isomorphic
+   - Adaptar tema agrícola personalizado
+   - Dashboard con métricas clave
+   - Gestión parcelas con componentes especializados
+   - Mapa integrado con Leaflet
 
 4. **Mobile MVP** (2 semanas)
    - Setup React Native + Expo
@@ -275,8 +286,9 @@ Testing específico por cultivo:
 ## Resumen Estado Actual
 
 ### ✅ COMPLETADO
-- **Documentación completa**: 8 documentos técnicos principales
+- **Documentación completa**: 9 documentos técnicos principales
 - **Stack tecnológico definido**: Decisiones justificadas y ADRs
+- **Frontend profesional**: Plantilla Isomorphic integrada y documentada
 - **Arquitectura diseñada**: Monorepo + microservicios futuro
 - **Integraciones planificadas**: SIGPAC + OCR + Weather + Pricing
 - **Plan desarrollo**: 4 fases con entregables específicos
