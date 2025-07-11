@@ -30,6 +30,7 @@ export default function RootLayout({ children }) {
               <a href="/parcelas" className="hover:text-green-200">Parcelas</a>
               <a href="/actividades" className="hover:text-green-200">Actividades</a>
               <a href="/mapa" className="hover:text-green-200">Mapa</a>
+              <a href="/sigpac" className="hover:text-green-200">SIGPAC</a>
             </div>
           </div>
         </nav>
