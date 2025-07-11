@@ -2,7 +2,6 @@
 const nextConfig = {
   output: 'standalone',
   reactStrictMode: true,
-  swcMinify: true,
   images: {
     unoptimized: true, // Disable Image Optimization API for Docker
   },

@@ -1,103 +1,150 @@
-import Image from "next/image";
-
 export default function Home() {
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              src/app/page.js
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+    <div className="min-h-screen bg-gray-50 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Hero Section */}
+        <div className="text-center mb-12">
+          <h1 className="text-4xl font-bold text-gray-900 mb-4">
+            🌾 Cuaderno de Campo GPS
+          </h1>
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            Sistema integral de gestión agrícola que permite registrar, gestionar y analizar 
+            actividades de campo mediante geolocalización GPS
+          </p>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
+          <div className="bg-white rounded-lg shadow p-6 text-center">
+            <div className="text-3xl font-bold text-green-600 mb-2">25+</div>
+            <div className="text-gray-600">Parcelas Registradas</div>
+          </div>
+          <div className="bg-white rounded-lg shadow p-6 text-center">
+            <div className="text-3xl font-bold text-blue-600 mb-2">156</div>
+            <div className="text-gray-600">Actividades</div>
+          </div>
+          <div className="bg-white rounded-lg shadow p-6 text-center">
+            <div className="text-3xl font-bold text-yellow-600 mb-2">247.5</div>
+            <div className="text-gray-600">Hectáreas Totales</div>
+          </div>
+          <div className="bg-white rounded-lg shadow p-6 text-center">
+            <div className="text-3xl font-bold text-purple-600 mb-2">12</div>
+            <div className="text-gray-600">Tipos de Cultivo</div>
+          </div>
+        </div>
+
+        {/* Features Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+          <div className="bg-white rounded-lg shadow-lg p-6">
+            <div className="text-green-600 text-3xl mb-4">📍</div>
+            <h3 className="text-xl font-semibold mb-3">GPS Precisión</h3>
+            <p className="text-gray-600">
+              Registro de actividades con coordenadas GPS de alta precisión (1-3 metros)
+              para trazabilidad completa.
+            </p>
+          </div>
+
+          <div className="bg-white rounded-lg shadow-lg p-6">
+            <div className="text-blue-600 text-3xl mb-4">📱</div>
+            <h3 className="text-xl font-semibold mb-3">App Móvil</h3>
+            <p className="text-gray-600">
+              Aplicación móvil con funcionalidad offline para registrar actividades 
+              directamente desde el campo.
+            </p>
+          </div>
+
+          <div className="bg-white rounded-lg shadow-lg p-6">
+            <div className="text-yellow-600 text-3xl mb-4">🗺️</div>
+            <h3 className="text-xl font-semibold mb-3">Mapas Interactivos</h3>
+            <p className="text-gray-600">
+              Visualización de parcelas en mapas interactivos con información 
+              detallada y análisis geoespacial.
+            </p>
+          </div>
+
+          <div className="bg-white rounded-lg shadow-lg p-6">
+            <div className="text-purple-600 text-3xl mb-4">📊</div>
+            <h3 className="text-xl font-semibold mb-3">Analytics Avanzado</h3>
+            <p className="text-gray-600">
+              Dashboards con métricas clave, análisis de rentabilidad y 
+              comparativas históricas.
+            </p>
+          </div>
+
+          <div className="bg-white rounded-lg shadow-lg p-6">
+            <div className="text-red-600 text-3xl mb-4">🌾</div>
+            <h3 className="text-xl font-semibold mb-3">Cultivos Específicos</h3>
+            <p className="text-gray-600">
+              Formularios adaptados para cereales, frutales, hortalizas, 
+              olivar y viñedo con validaciones específicas.
+            </p>
+          </div>
+
+          <div className="bg-white rounded-lg shadow-lg p-6">
+            <div className="text-indigo-600 text-3xl mb-4">📋</div>
+            <h3 className="text-xl font-semibold mb-3">Cumplimiento PAC</h3>
+            <p className="text-gray-600">
+              Generación automática de informes para cumplimiento de la 
+              Política Agrícola Común (PAC).
+            </p>
+          </div>
+        </div>
+
+        {/* CTA Section */}
+        <div className="bg-green-600 rounded-lg shadow-lg p-8 text-center text-white mb-12">
+          <h2 className="text-3xl font-bold mb-4">¿Listo para digitalizar tu explotación?</h2>
+          <p className="text-lg mb-6 opacity-90">
+            Comienza a gestionar tus actividades agrícolas de forma profesional y eficiente
+          </p>
+          <div className="space-x-4">
+            <a
+              href="/parcelas"
+              className="inline-block bg-white text-green-600 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors"
+            >
+              🌾 Gestionar Parcelas
+            </a>
+            <a
+              href="/actividades"
+              className="inline-block bg-green-700 text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-800 transition-colors"
+            >
+              📝 Registrar Actividad
+            </a>
+            <a
+              href="/mapa"
+              className="inline-block bg-green-700 text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-800 transition-colors"
+            >
+              🗺️ Ver Mapa
+            </a>
+          </div>
+        </div>
+
+        {/* Technology Stack */}
+        <div className="bg-white rounded-lg shadow p-8">
+          <h3 className="text-2xl font-bold text-center mb-8">Stack Tecnológico</h3>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+            <div>
+              <div className="text-2xl mb-2">⚛️</div>
+              <div className="font-semibold">React Native</div>
+              <div className="text-sm text-gray-600">App Móvil</div>
+            </div>
+            <div>
+              <div className="text-2xl mb-2">🌐</div>
+              <div className="font-semibold">Next.js</div>
+              <div className="text-sm text-gray-600">Frontend Web</div>
+            </div>
+            <div>
+              <div className="text-2xl mb-2">🚀</div>
+              <div className="font-semibold">Node.js</div>
+              <div className="text-sm text-gray-600">Backend API</div>
+            </div>
+            <div>
+              <div className="text-2xl mb-2">🗄️</div>
+              <div className="font-semibold">PostgreSQL</div>
+              <div className="text-sm text-gray-600">Base de Datos</div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

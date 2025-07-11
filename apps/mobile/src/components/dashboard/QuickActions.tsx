@@ -20,7 +20,7 @@ export function QuickActions() {
       title: 'Nueva Actividad',
       icon: 'plus.circle.fill',
       color: colors.primary,
-      onPress: () => router.push('/(tabs)/activity'),
+      onPress: () => router.push('/registro-actividad'),
     },
     {
       title: 'Ver Mapa',
@@ -41,10 +41,7 @@ export function QuickActions() {
       title: 'GPS Actual',
       icon: 'location.fill',
       color: colors.error,
-      onPress: () => {
-        // TODO: Implementar obtener ubicación
-        console.log('Obtener GPS');
-      },
+      onPress: () => router.push('/registro-actividad'),
     },
   ];
 
