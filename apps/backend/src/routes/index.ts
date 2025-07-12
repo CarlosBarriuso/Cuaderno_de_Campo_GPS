@@ -4,6 +4,8 @@ import { actividadesRoutes } from './actividades';
 import { authRoutes } from './auth';
 import { sigpacRoutes } from './sigpac';
 import { ocrRoutes } from './ocr';
+import weatherRoutes from './weather';
+import performanceRoutes from './performance';
 // import { analyticsRoutes } from './analytics';
 // import { informesRoutes } from './informes';
 
@@ -15,6 +17,8 @@ router.use('/parcelas', parcelasRoutes);
 router.use('/actividades', actividadesRoutes);
 router.use('/sigpac', sigpacRoutes);
 router.use('/ocr', ocrRoutes);
+router.use('/weather', weatherRoutes);
+router.use('/performance', performanceRoutes);
 // router.use('/analytics', analyticsRoutes);
 // router.use('/informes', informesRoutes);
 
@@ -29,6 +33,8 @@ router.get('/', (req, res) => {
       actividades: '/api/actividades',
       sigpac: '/api/sigpac',
       ocr: '/api/ocr',
+      weather: '/api/weather',
+      performance: '/api/performance',
       health: '/health',
     },
     documentation: 'https://github.com/CarlosBarriuso/Cuaderno_de_Campo_GPS/docs',

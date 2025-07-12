@@ -10,6 +10,7 @@ import { logger } from '@/config/logger';
 import { connectDatabase, disconnectDatabase } from '@/database/connection';
 import { errorHandler } from '@/middleware/errorHandler';
 import { authMiddleware } from '@/middleware/auth';
+import { performanceMonitor, cacheMiddleware, compressionOptimizer } from '@/middleware/performance';
 import { apiRoutes } from '@/routes';
 import { healthRoutes } from '@/routes/health';
 
@@ -60,6 +61,10 @@ app.use('/api/', limiter);
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
+// Performance monitoring
+app.use(performanceMonitor);
+app.use(compressionOptimizer);
+
 // Request logging
 app.use((req, res, next) => {
   logger.info(`${req.method} ${req.path}`, {
@@ -73,8 +78,8 @@ app.use((req, res, next) => {
 // Health check routes (no auth required)
 app.use('/health', healthRoutes);
 
-// API routes with authentication
-app.use('/api', authMiddleware, apiRoutes);
+// API routes with authentication and caching
+app.use('/api', authMiddleware, cacheMiddleware(300), apiRoutes);
 
 // 404 handler
 app.use('*', (req, res) => {
