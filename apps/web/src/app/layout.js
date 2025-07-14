@@ -1,5 +1,7 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { Providers } from "./providers";
+import { AuthNavigation } from "@/components/auth/AuthNavigation";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -22,19 +24,10 @@ export default function RootLayout({ children }) {
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <nav className="bg-green-600 text-white p-4">
-          <div className="max-w-7xl mx-auto flex justify-between items-center">
-            <h1 className="text-xl font-bold">🌾 Cuaderno de Campo GPS</h1>
-            <div className="space-x-4">
-              <a href="/" className="hover:text-green-200">Dashboard</a>
-              <a href="/parcelas" className="hover:text-green-200">Parcelas</a>
-              <a href="/actividades" className="hover:text-green-200">Actividades</a>
-              <a href="/mapa" className="hover:text-green-200">Mapa</a>
-              <a href="/sigpac" className="hover:text-green-200">SIGPAC</a>
-            </div>
-          </div>
-        </nav>
-        {children}
+        <Providers>
+          <AuthNavigation />
+          {children}
+        </Providers>
       </body>
     </html>
   );

@@ -1,11 +1,11 @@
 import { Request, Response, NextFunction } from 'express';
-import { clerkAuth, extractUserInfo, requireAuth } from '@/config/auth';
+import { clerkWithAuth, requireAuth, extractUserInfo, requireAuthMiddleware } from '@/config/auth';
 import { logger } from '@/config/logger';
 
 // Middleware principal de autenticación que combina Clerk + extracción de usuario
 export const authMiddleware = [
-  // 1. Autenticación con Clerk
-  clerkAuth,
+  // 1. Autenticación con Clerk (opcional - añade auth a req)
+  clerkWithAuth,
   
   // 2. Extraer información del usuario
   extractUserInfo,
@@ -27,10 +27,10 @@ export const authMiddleware = [
 // Middleware para rutas que requieren autenticación obligatoria
 export const protectedRoute = [
   ...authMiddleware,
-  requireAuth,
+  requireAuthMiddleware,
 ];
 
 // Middleware para rutas opcionales (pueden ser públicas o autenticadas)
 export const optionalAuth = authMiddleware;
 
-export { requireAuth };
+export { requireAuthMiddleware as requireAuth };

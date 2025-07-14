@@ -262,7 +262,7 @@ export class SIGPACReferenceParser {
   private static createError(code: SIGPACError['code'], message: string, reference?: string): SIGPACError {
     const error = new Error(message) as SIGPACError;
     error.code = code;
-    error.reference = reference;
+    error.reference = reference || '';
     error.name = 'SIGPACError';
     return error;
   }

@@ -32,6 +32,8 @@ model User {
   organizacion     Organizacion? @relation(fields: [organizationId], references: [id])
   
   @@map("users")
+  @@index([clerkId, updatedAt])
+  @@index([organizationId, role, lastLoginAt])
 }
 
 enum UserRole {
@@ -62,6 +64,7 @@ model Organizacion {
   usuarios         User[]
   
   @@map("organizaciones")
+  @@index([tipo])
 }
 
 enum TipoOrganizacion {
@@ -117,6 +120,8 @@ model Parcela {
   @@index([propietarioId])
   @@index([tipoCultivo])
   @@index([referenciaSigpac])
+  @@index([propietarioId, activa, tipoCultivo])
+  @@index([referenciaSigpac, propietarioId, activa])
 }
 
 enum TipoCultivo {
@@ -206,6 +211,10 @@ model Actividad {
   @@index([usuarioId])
   @@index([tipo])
   @@index([fecha])
+  @@index([usuarioId, fecha(sort: Desc), tipo])
+  @@index([parcelaId, fecha(sort: Desc), tipo])
+  @@index([fecha(sort: Desc), tipo, parcelaId])
+  @@index([estado, fecha, tipo])
 }
 
 enum TipoActividad {

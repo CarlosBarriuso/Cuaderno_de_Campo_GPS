@@ -63,17 +63,21 @@ export class SIGPACController {
       });
 
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorStack = error instanceof Error ? error.stack : undefined;
+      
       this.logger.error('Error consultando parcela SIGPAC', { 
         referencia: req.params.referencia,
-        error: error.message,
-        stack: error.stack
+        error: errorMessage,
+        stack: errorStack
       });
 
-      if (error.name === 'SIGPACError') {
+      if (error instanceof Error && error.name === 'SIGPACError') {
+        const sigpacError = error as any;
         res.status(400).json({
-          error: error.code,
-          message: error.message,
-          referencia: error.reference
+          error: sigpacError.code,
+          message: sigpacError.message,
+          referencia: sigpacError.reference
         });
       } else {
         next(error);
@@ -128,9 +132,10 @@ export class SIGPACController {
       });
 
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       this.logger.error('Error en búsqueda por coordenadas', { 
         body: req.body,
-        error: error.message 
+        error: errorMessage 
       });
       next(error);
     }
@@ -185,9 +190,10 @@ export class SIGPACController {
       });
 
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       this.logger.error('Error validando referencias', { 
         count: req.body?.referencias?.length,
-        error: error.message 
+        error: errorMessage 
       });
       next(error);
     }
@@ -210,10 +216,11 @@ export class SIGPACController {
       });
 
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       this.logger.error('Error en health check SIGPAC', error);
       res.status(503).json({
         status: 'unhealthy',
-        error: error.message,
+        error: errorMessage,
         timestamp: new Date()
       });
     }

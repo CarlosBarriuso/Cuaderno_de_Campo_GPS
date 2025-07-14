@@ -1,4 +1,4 @@
-describe('Agricultural Workflow - Mobile E2E', () => {
+describe('Agricultural Workflow - Complete Mobile E2E - Phase 4', () => {
   
   beforeEach(async () => {
     await device.reloadReactNative();
@@ -277,5 +277,287 @@ describe('Agricultural Workflow - Mobile E2E', () => {
     
     // No memory warnings should appear
     await expect(element(by.id('memory-warning'))).not.toBeVisible();
+  });
+
+  // ====== PHASE 3 NEW FEATURES TESTING ======
+
+  it('Weather integration: Alerts and agricultural recommendations', async () => {
+    // Navigate to dashboard to see weather widget
+    await element(by.id('tab-dashboard')).tap();
+    
+    // Wait for weather widget to load
+    await waitFor(element(by.id('weather-widget')))
+      .toBeVisible()
+      .withTimeout(15000);
+    
+    // Verify weather data is displayed
+    await expect(element(by.id('current-temperature'))).toBeVisible();
+    await expect(element(by.id('weather-description'))).toBeVisible();
+    await expect(element(by.id('humidity-display'))).toBeVisible();
+    
+    // Check for weather alerts section
+    const alertsSection = element(by.id('weather-alerts-section'));
+    if (await alertsSection.isVisible()) {
+      await expect(element(by.id('alert-type'))).toBeVisible();
+      await expect(element(by.id('alert-severity'))).toBeVisible();
+      
+      // Tap alert for details
+      await element(by.id('view-alert-details')).tap();
+      await expect(element(by.id('alert-description'))).toBeVisible();
+      await expect(element(by.id('agricultural-recommendation'))).toBeVisible();
+    }
+    
+    // Test agricultural recommendations
+    await element(by.id('view-agricultural-recommendations')).tap();
+    await expect(element(by.id('work-field-recommendation'))).toBeVisible();
+    await expect(element(by.id('irrigation-recommendation'))).toBeVisible();
+    await expect(element(by.id('frost-protection-recommendation'))).toBeVisible();
+  });
+
+  it('OCR functionality: Scan agricultural products', async () => {
+    await element(by.id('tab-actividades')).tap();
+    await element(by.id('add-actividad-button')).tap();
+    
+    // Test OCR product scanning
+    await element(by.id('scan-product-button')).tap();
+    await element(by.id('camera-option')).tap();
+    
+    // Simulate taking photo of product label
+    await waitFor(element(by.id('camera-view'))).toBeVisible().withTimeout(5000);
+    await element(by.id('capture-photo-button')).tap();
+    
+    // Wait for OCR processing
+    await waitFor(element(by.id('ocr-processing-complete')))
+      .toBeVisible()
+      .withTimeout(30000);
+    
+    // Verify OCR results
+    await expect(element(by.id('ocr-results-container'))).toBeVisible();
+    
+    const productName = element(by.id('detected-product-name'));
+    if (await productName.isVisible()) {
+      await expect(productName).not.toHaveText('');
+    }
+    
+    const productType = element(by.id('detected-product-type'));
+    if (await productType.isVisible()) {
+      await expect(productType).toHaveText(/(herbicida|fungicida|fertilizante|semilla)/);
+    }
+    
+    // Apply OCR results to form
+    await element(by.id('apply-ocr-results')).tap();
+    await expect(element(by.id('actividad-producto-input'))).not.toHaveText('');
+  });
+
+  it('Advanced analytics: ROI calculation and business intelligence', async () => {
+    // First create some test data
+    await element(by.id('tab-actividades')).tap();
+    
+    const testActivities = [
+      { desc: 'Siembra', cost: '300.00', type: 'siembra' },
+      { desc: 'Fertilización', cost: '150.50', type: 'fertilizacion' },
+      { desc: 'Tratamiento', cost: '200.00', type: 'tratamiento' }
+    ];
+    
+    for (const activity of testActivities) {
+      await element(by.id('add-actividad-button')).tap();
+      await element(by.id('actividad-descripcion-input')).typeText(activity.desc);
+      await element(by.id('actividad-costo-input')).typeText(activity.cost);
+      await element(by.id('save-actividad-button')).tap();
+    }
+    
+    // Navigate to analytics
+    await element(by.id('tab-analytics')).tap();
+    
+    // Wait for analytics to load
+    await waitFor(element(by.id('analytics-dashboard'))).toBeVisible().withTimeout(10000);
+    
+    // Verify cost analysis
+    await expect(element(by.id('total-costs-card'))).toBeVisible();
+    await expect(element(by.text('650.50€'))).toBeVisible(); // Sum of costs
+    
+    // Check cost breakdown by category
+    await expect(element(by.id('cost-breakdown-chart'))).toBeVisible();
+    
+    // Test profitability analysis
+    await element(by.id('profitability-tab')).tap();
+    await expect(element(by.id('roi-calculation'))).toBeVisible();
+    await expect(element(by.id('cost-per-hectare'))).toBeVisible();
+    
+    // Test benchmarking
+    await element(by.id('benchmarking-tab')).tap();
+    await expect(element(by.id('sector-comparison'))).toBeVisible();
+    await expect(element(by.text('Comparación sector'))).toBeVisible();
+    
+    // Test recommendations
+    await element(by.id('recommendations-tab')).tap();
+    await expect(element(by.id('optimization-recommendations'))).toBeVisible();
+  });
+
+  it('WatermelonDB offline sync: Complex scenarios', async () => {
+    await simulateOfflineMode();
+    
+    // Create complex offline operations
+    const operations = [
+      { type: 'parcela', data: { name: 'Offline Complex 1', surface: '10.0' } },
+      { type: 'parcela', data: { name: 'Offline Complex 2', surface: '15.5' } },
+      { type: 'actividad', data: { desc: 'Complex Activity 1', cost: '100.00' } },
+      { type: 'actividad', data: { desc: 'Complex Activity 2', cost: '200.00' } }
+    ];
+    
+    // Create parcelas offline
+    for (const op of operations.filter(o => o.type === 'parcela')) {
+      await element(by.id('tab-parcelas')).tap();
+      await element(by.id('add-parcela-button')).tap();
+      await element(by.id('parcela-nombre-input')).typeText(op.data.name);
+      await element(by.id('parcela-superficie-input')).typeText(op.data.surface);
+      await element(by.id('save-parcela-button')).tap();
+    }
+    
+    // Create activities offline
+    for (const op of operations.filter(o => o.type === 'actividad')) {
+      await element(by.id('tab-actividades')).tap();
+      await element(by.id('add-actividad-button')).tap();
+      await element(by.id('actividad-descripcion-input')).typeText(op.data.desc);
+      await element(by.id('actividad-costo-input')).typeText(op.data.cost);
+      await element(by.id('save-actividad-button')).tap();
+    }
+    
+    // Check sync queue
+    await element(by.id('sync-queue-button')).tap();
+    await expect(element(by.text('4 operaciones pendientes'))).toBeVisible();
+    
+    // Verify queue priorities
+    await expect(element(by.id('high-priority-operations'))).toBeVisible();
+    await expect(element(by.id('normal-priority-operations'))).toBeVisible();
+    
+    await simulateOnlineMode();
+    
+    // Trigger batch sync
+    await element(by.id('sync-all-button')).tap();
+    
+    // Monitor sync progress
+    await expect(element(by.id('sync-progress-indicator'))).toBeVisible();
+    await waitFor(element(by.text('Sincronización completada')))
+      .toBeVisible()
+      .withTimeout(30000);
+    
+    // Verify all operations synced
+    await expect(element(by.text('0 operaciones pendientes'))).toBeVisible();
+  });
+
+  it('SIGPAC integration: Reference validation on mobile', async () => {
+    await element(by.id('tab-parcelas')).tap();
+    await element(by.id('add-parcela-button')).tap();
+    
+    // Test SIGPAC reference input
+    await element(by.id('sigpac-reference-input')).typeText('28:079:0001:00001:0001:WX');
+    await element(by.id('validate-sigpac-button')).tap();
+    
+    // Wait for SIGPAC validation
+    await waitFor(element(by.id('sigpac-validation-result')))
+      .toBeVisible()
+      .withTimeout(15000);
+    
+    // Verify validation results
+    await expect(element(by.id('sigpac-province'))).toHaveText('Madrid');
+    await expect(element(by.id('sigpac-municipality'))).toBeVisible();
+    await expect(element(by.id('sigpac-surface'))).toBeVisible();
+    
+    // Test auto-filling coordinates from SIGPAC
+    const autoFillButton = element(by.id('auto-fill-coordinates'));
+    if (await autoFillButton.isVisible()) {
+      await autoFillButton.tap();
+      await expect(element(by.id('latitude-input'))).not.toHaveText('');
+      await expect(element(by.id('longitude-input'))).not.toHaveText('');
+    }
+    
+    // Test invalid SIGPAC reference
+    await element(by.id('sigpac-reference-input')).clearText();
+    await element(by.id('sigpac-reference-input')).typeText('INVALID:REFERENCE');
+    await element(by.id('validate-sigpac-button')).tap();
+    
+    await waitFor(element(by.id('sigpac-error-message')))
+      .toBeVisible()
+      .withTimeout(10000);
+    
+    await expect(element(by.text(/inválida|error/))).toBeVisible();
+  });
+
+  it('Performance: Phase 3 features under load', async () => {
+    const startTime = Date.now();
+    
+    // Test weather widget loading performance
+    await element(by.id('tab-dashboard')).tap();
+    await waitFor(element(by.id('weather-widget'))).toBeVisible().withTimeout(5000);
+    
+    const weatherLoadTime = Date.now() - startTime;
+    expect(weatherLoadTime).toBeLessThan(5000); // Weather should load within 5 seconds
+    
+    // Test analytics performance with data
+    const analyticsStartTime = Date.now();
+    await element(by.id('tab-analytics')).tap();
+    await waitFor(element(by.id('analytics-dashboard'))).toBeVisible().withTimeout(8000);
+    
+    const analyticsLoadTime = Date.now() - analyticsStartTime;
+    expect(analyticsLoadTime).toBeLessThan(8000); // Analytics should load within 8 seconds
+    
+    // Test sync performance
+    await simulateOfflineMode();
+    
+    // Create multiple operations quickly
+    for (let i = 0; i < 5; i++) {
+      await element(by.id('tab-actividades')).tap();
+      await element(by.id('add-actividad-button')).tap();
+      await element(by.id('actividad-descripcion-input')).typeText(`Performance Test ${i}`);
+      await element(by.id('save-actividad-button')).tap();
+    }
+    
+    await simulateOnlineMode();
+    
+    const syncStartTime = Date.now();
+    await element(by.id('sync-all-button')).tap();
+    await waitFor(element(by.text('Sincronización completada')))
+      .toBeVisible()
+      .withTimeout(15000);
+    
+    const syncTime = Date.now() - syncStartTime;
+    expect(syncTime).toBeLessThan(15000); // Sync should complete within 15 seconds
+    
+    console.log(`Performance metrics - Weather: ${weatherLoadTime}ms, Analytics: ${analyticsLoadTime}ms, Sync: ${syncTime}ms`);
+  });
+
+  it('Network resilience: Intermittent connectivity', async () => {
+    // Start online
+    await element(by.id('tab-actividades')).tap();
+    await element(by.id('add-actividad-button')).tap();
+    await element(by.id('actividad-descripcion-input')).typeText('Network Test Activity');
+    
+    // Go offline while saving
+    await simulateOfflineMode();
+    await element(by.id('save-actividad-button')).tap();
+    
+    // Verify offline save worked
+    await expect(element(by.id('offline-save-indicator'))).toBeVisible();
+    
+    // Simulate intermittent connectivity
+    await simulateOnlineMode();
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    await simulateOfflineMode();
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    await simulateOnlineMode();
+    
+    // Trigger sync during unstable connection
+    await element(by.id('sync-button')).tap();
+    
+    // Verify resilient sync behavior
+    await waitFor(element(by.id('sync-retry-indicator')))
+      .toBeVisible()
+      .withTimeout(10000);
+    
+    // Eventually should succeed
+    await waitFor(element(by.text('Sincronización exitosa')))
+      .toBeVisible()
+      .withTimeout(30000);
   });
 });
