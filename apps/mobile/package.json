@@ -64,6 +64,7 @@
     "@types/react-test-renderer": "^18.3.0",
     "@typescript-eslint/eslint-plugin": "^8.19.0",
     "@typescript-eslint/parser": "^8.19.0",
+    "ajv": "^8.17.1",
     "detox": "^20.40.1",
     "eslint": "^9.17.0",
     "eslint-config-expo": "^7.1.2",
