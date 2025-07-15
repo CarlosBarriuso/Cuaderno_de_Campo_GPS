@@ -1,0 +1,35 @@
+# FastAPI Core
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+python-multipart==0.0.6
+pydantic==2.5.0
+pydantic-settings==2.1.0
+
+# Database
+sqlalchemy==2.0.23
+psycopg2-binary==2.9.9
+asyncpg==0.29.0
+geoalchemy2==0.17.1
+
+# Authentication
+python-jose[cryptography]==3.3.0
+PyJWT==2.8.0
+
+# Utilities
+python-dotenv==1.0.0
+requests==2.31.0
+httpx==0.25.2
+loguru==0.7.2
+
+# NumPy (downgraded to 1.x for compatibility)
+numpy<2.0
+
+# OpenCV (headless version - no GUI dependencies)
+opencv-python-headless
+
+# OCR
+pytesseract==0.3.10
+Pillow==10.1.0
+
+# Geospatial (minimal)
+shapely
