@@ -38,6 +38,48 @@ interface UserWithSubscription {
 }
 
 /**
+ * Get plan limits based on plan ID
+ */
+function getPlanLimits(planId: string) {
+  const planLimits = {
+    plan_free: {
+      max_parcelas: 1,
+      max_actividades: 10,
+      storage_gb: 0.5,
+      ocr_monthly_limit: 5,
+      weather_api_calls: 50,
+      price: 0
+    },
+    plan_basic: {
+      max_parcelas: 5,
+      max_actividades: 50,
+      storage_gb: 2,
+      ocr_monthly_limit: 10,
+      weather_api_calls: 100,
+      price: 9.99
+    },
+    plan_professional: {
+      max_parcelas: 25,
+      max_actividades: 200,
+      storage_gb: 10,
+      ocr_monthly_limit: 50,
+      weather_api_calls: 500,
+      price: 29.99
+    },
+    plan_enterprise: {
+      max_parcelas: -1,
+      max_actividades: -1,
+      storage_gb: 50,
+      ocr_monthly_limit: -1,
+      weather_api_calls: -1,
+      price: 99.99
+    }
+  }
+  
+  return planLimits[planId] || planLimits.plan_free
+}
+
+/**
  * Hook para obtener información de suscripción del usuario
  */
 export function useSubscription() {
@@ -65,13 +107,28 @@ export function useSubscription() {
       const response = await api.subscription.current()
       console.log('✅ User subscription response:', response)
       
-      if (response.success && response.data) {
-        // Enrich subscription data with user information
-        const enrichedSubscription = {
-          ...response.data,
+      if (response && response.success && response.data) {
+        // Map FastAPI response to frontend subscription format
+        const apiData = response.data
+        const enrichedSubscription: Subscription = {
+          plan: apiData.plan_id || 'plan_free',
+          status: apiData.status || 'active',
+          max_parcelas: getPlanLimits(apiData.plan_id || 'plan_free').max_parcelas,
+          max_actividades: getPlanLimits(apiData.plan_id || 'plan_free').max_actividades,
+          storage_gb: getPlanLimits(apiData.plan_id || 'plan_free').storage_gb,
+          ocr_monthly_limit: getPlanLimits(apiData.plan_id || 'plan_free').ocr_monthly_limit,
+          weather_api_calls: getPlanLimits(apiData.plan_id || 'plan_free').weather_api_calls,
+          priority_support: (apiData.plan_id || 'plan_free') !== 'plan_free',
+          advanced_analytics: ['plan_professional', 'plan_enterprise'].includes(apiData.plan_id || 'plan_free'),
+          export_formats: ['PDF'],
           user_id: clerkUser?.id,
           user_email: clerkUser?.emailAddresses[0]?.emailAddress,
-          user_name: clerkUser?.firstName || clerkUser?.emailAddresses[0]?.emailAddress
+          user_name: clerkUser?.firstName || clerkUser?.emailAddresses[0]?.emailAddress,
+          // Legacy fields for backward compatibility
+          hectareasLimite: getPlanLimits(apiData.plan_id || 'plan_free').max_parcelas,
+          hectareasUsadas: 0, // TODO: Get real usage
+          precio: getPlanLimits(apiData.plan_id || 'plan_free').price,
+          moneda: 'EUR'
         }
         setSubscription(enrichedSubscription)
       } else {

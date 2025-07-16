@@ -161,6 +161,16 @@ export const api = {
     getByReference: (referencia: string) => apiClient.get(`/api/v1/sigpac/${referencia}`),
     validateReference: (referencia: string) => apiClient.get(`/api/v1/sigpac/validate/${referencia}`),
   },
+
+  // Subscription endpoints
+  subscription: {
+    plans: () => apiClient.get('/api/v1/subscription/plans'),
+    current: () => apiClient.get('/api/v1/subscription/current'),
+    upgrade: (planId: string) => apiClient.post('/api/v1/subscription/upgrade', { plan_id: planId }),
+    cancel: () => apiClient.post('/api/v1/subscription/cancel'),
+    usage: () => apiClient.get('/api/v1/subscription/usage'),
+    billingHistory: () => apiClient.get('/api/v1/subscription/billing/history'),
+  },
 };
 
 export default apiClient;
