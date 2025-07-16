@@ -1,0 +1,139 @@
+version: '3.8'
+
+services:
+  # FastAPI Backend (Python)
+  backend:
+    build:
+      context: ./apps/backend-python
+      dockerfile: Dockerfile
+    container_name: cuaderno_fastapi_backend
+    ports:
+      - "8000:8000"
+    environment:
+      - DEBUG=true
+      - HOST=0.0.0.0
+      - PORT=8000
+      - DATABASE_URL=postgresql://postgres:password@postgres:5432/cuaderno_campo_dev
+      - REDIS_URL=redis://redis:6379
+      - CLERK_PUBLISHABLE_KEY=pk_test_aHVtYW5lLWd1cHB5LTIyLmNsZXJrLmFjY291bnRzLmRldiQ
+      - CLERK_SECRET_KEY=sk_test_AqBQomscU8lsQEkGeeWamDtMsN18GKfnl2g5Fqmdcz
+      - CORS_ORIGINS=http://localhost:3000,http://frontend:3000
+      - ALLOWED_HOSTS=*
+      - SECRET_KEY=fastapi-secret-key-for-development
+      - PYTHONPATH=/app
+    volumes:
+      - ./apps/backend-python:/app
+      - /app/venv
+      - backend_uploads:/app/uploads
+      - backend_logs:/app/logs
+    networks:
+      - cuaderno_network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Next.js Frontend
+  frontend:
+    build:
+      context: ./apps/web
+      dockerfile: Dockerfile
+    container_name: cuaderno_nextjs_frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
+      - NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_aHVtYW5lLWd1cHB5LTIyLmNsZXJrLmFjY291bnRzLmRldiQ
+      - WATCHPACK_POLLING=true
+      - CHOKIDAR_USEPOLLING=true
+    volumes:
+      - ./apps/web:/app
+      - /app/node_modules
+      - /app/.next
+    networks:
+      - cuaderno_network
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+    stdin_open: true
+    tty: true
+
+  # PostgreSQL con PostGIS
+  postgres:
+    image: postgis/postgis:16-3.4
+    container_name: cuaderno_postgres
+    environment:
+      POSTGRES_DB: cuaderno_campo_dev
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=C"
+    ports:
+      - "5434:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./apps/backend-python/init_db.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+    networks:
+      - cuaderno_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d cuaderno_campo_dev"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+
+  # Redis para caché
+  redis:
+    image: redis:7-alpine
+    container_name: cuaderno_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - cuaderno_network
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+
+  # Adminer para gestión de base de datos (opcional)
+  adminer:
+    image: adminer:4.8.1-standalone
+    container_name: cuaderno_adminer
+    ports:
+      - "8080:8080"
+    networks:
+      - cuaderno_network
+    depends_on:
+      - postgres
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  backend_uploads:
+    driver: local
+  backend_logs:
+    driver: local
+
+networks:
+  cuaderno_network:
+    driver: bridge
+    name: cuaderno_fastapi_network

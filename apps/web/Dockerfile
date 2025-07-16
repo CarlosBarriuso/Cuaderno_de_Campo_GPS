@@ -1,43 +1,33 @@
-# Use an official Node.js image as the base
-FROM node:20-alpine AS builder
+# Next.js Frontend Dockerfile - Development Version
+FROM node:18-alpine
 
-# Set the working directory
+# Set working directory
 WORKDIR /app
+
+# Install curl for health checks
+RUN apk add --no-cache curl
 
 # Copy package files
 COPY package*.json ./
 
-# Install dependencies with retry logic
-RUN npm config set registry https://registry.npmjs.org/ && \
-    npm config set fetch-retries 5 && \
-    npm config set fetch-retry-mintimeout 20000 && \
-    npm config set fetch-retry-maxtimeout 120000 && \
-    npm ci --prefer-offline --no-audit --progress=false
+# Install dependencies
+RUN npm install
 
-# Copy the rest of the application
+# Copy application code
 COPY . .
 
-# Build the application
-RUN npm run build
+# Create .next directory with correct permissions
+RUN mkdir -p .next && chown -R node:node .next
 
-# Production stage
-FROM node:20-alpine AS runner
+# Switch to non-root user
+USER node
 
-WORKDIR /app
-
-# Set environment variables
-ENV NODE_ENV=production
-
-# Copy package files and install production dependencies
-COPY --from=builder /app/package*.json ./
-RUN npm ci --only=production --prefer-offline --no-audit --progress=false
-
-# Copy built assets
-COPY --from=builder /app/.next ./.next
-COPY --from=builder /app/public ./public
-
-# Set the port
+# Expose port
 EXPOSE 3000
 
-# Start the application using npm start
-CMD ["npm", "start"]
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:3000 || exit 1
+
+# Run in development mode
+CMD ["npm", "run", "dev"]

@@ -1,0 +1,175 @@
+{
+  "usuario_prueba": {
+    "personal_info": {
+      "nombre": "Gustavo",
+      "apellidos": "Miguel Matamala", 
+      "nombre_completo": "Gustavo Miguel Matamala",
+      "email": "yonimeescucho@gmail.com",
+      "telefono": "+34 666 123 456",
+      "direccion": "Calle Medina 6, 42230 Yelo, Soria"
+    },
+    "perfil_agricola": {
+      "provincia": "Soria",
+      "comunidad_autonoma": "Castilla y León",
+      "tipo_agricultor": "Individual",
+      "cultivos_principales": ["Cereales de secano", "Leguminosas"],
+      "hectareas_gestionadas": "75 hectáreas",
+      "experiencia": "15 años",
+      "tipo_explotacion": "Familiar"
+    },
+    "parcelas_reales_soria": [
+      {
+        "nombre": "Parcela Norte Cereales",
+        "referencia_sigpac": "42:001:0001:00010:0001:WR",
+        "superficie_ha": 25.5,
+        "cultivo_actual": "Trigo blando",
+        "coordenadas_centro": {
+          "lat": 41.7891,
+          "lng": -2.1234
+        },
+        "tipo_cultivo": "Secano",
+        "descripcion": "Parcela principal cereales invierno"
+      },
+      {
+        "nombre": "Parcela Sur Leguminosas", 
+        "referencia_sigpac": "42:001:0001:00010:0002:WR",
+        "superficie_ha": 18.2,
+        "cultivo_actual": "Lentejas",
+        "coordenadas_centro": {
+          "lat": 41.7856,
+          "lng": -2.1189
+        },
+        "tipo_cultivo": "Secano",
+        "descripcion": "Rotación leguminosas para mejora suelo"
+      },
+      {
+        "nombre": "Parcela Este Barbecho",
+        "referencia_sigpac": "42:001:0001:00010:0003:WR", 
+        "superficie_ha": 31.3,
+        "cultivo_actual": "Barbecho",
+        "coordenadas_centro": {
+          "lat": 41.7923,
+          "lng": -2.1156
+        },
+        "tipo_cultivo": "Secano",
+        "descripcion": "En barbecho para próxima campaña"
+      }
+    ],
+    "actividades_tipo": [
+      {
+        "tipo": "PREPARACION_SUELO",
+        "nombre": "Laboreo primario",
+        "descripcion": "Arado de vertedera preparación suelo",
+        "epoca": "Septiembre-Octubre",
+        "maquinaria": "Tractor + Arado vertedera"
+      },
+      {
+        "tipo": "SIEMBRA", 
+        "nombre": "Siembra cereales invierno",
+        "descripcion": "Siembra trigo blando variedad Chamorro",
+        "epoca": "Octubre-Noviembre",
+        "dosis": "180 kg/ha",
+        "producto": "Semilla trigo certificada"
+      },
+      {
+        "tipo": "FERTILIZACION",
+        "nombre": "Abonado de fondo",
+        "descripcion": "Aplicación fertilizante complejo",
+        "epoca": "Siembra",
+        "dosis": "300 kg/ha",
+        "producto": "Complejo 8-15-15"
+      },
+      {
+        "tipo": "TRATAMIENTO_FITOSANITARIO",
+        "nombre": "Herbicida post-emergencia",
+        "descripcion": "Control malas hierbas dicotiledóneas",
+        "epoca": "Febrero-Marzo", 
+        "dosis": "1.5 L/ha",
+        "producto": "2,4-D + MCPA"
+      },
+      {
+        "tipo": "COSECHA",
+        "nombre": "Recolección cereales",
+        "descripcion": "Cosecha con cosechadora propia",
+        "epoca": "Julio",
+        "rendimiento_esperado": "3500 kg/ha"
+      }
+    ],
+    "planes_disponibles": {
+      "plan_actual": "gratuito",
+      "planes_test": [
+        {
+          "id": "basico",
+          "nombre": "Plan Básico",
+          "precio_mes": 45,
+          "precio_ha_mes": 0.60,
+          "limite_hectareas": 500,
+          "caracteristicas": [
+            "Gestión parcelas ilimitadas",
+            "Registro actividades GPS", 
+            "Integración SIGPAC oficial",
+            "Weather alerts básicas",
+            "Informes PAC automáticos",
+            "Soporte email"
+          ]
+        },
+        {
+          "id": "profesional", 
+          "nombre": "Plan Profesional",
+          "precio_mes": 75,
+          "precio_ha_mes": 0.45,
+          "limite_hectareas": 1000,
+          "caracteristicas": [
+            "Todo Plan Básico",
+            "Analytics avanzados ROI",
+            "OCR productos offline",
+            "Weather intelligence completa",
+            "Exportación datos completa",
+            "Soporte telefónico prioritario"
+          ]
+        },
+        {
+          "id": "enterprise",
+          "nombre": "Plan Enterprise", 
+          "precio_mes": 120,
+          "precio_ha_mes": 0.30,
+          "limite_hectareas": "ilimitadas",
+          "caracteristicas": [
+            "Todo Plan Profesional",
+            "Business Intelligence completo",
+            "API access para integraciones",
+            "Multi-usuario cooperativas",
+            "Soporte dedicado 24/7",
+            "Formación personalizada"
+          ]
+        }
+      ]
+    },
+    "configuracion_testing": {
+      "dispositivos_prueba": {
+        "android": {
+          "metodo": "Expo Go + tunnel",
+          "url_testing": "exp://localhost:19000",
+          "requisitos": "Android 8.0+, Expo Go app"
+        },
+        "iphone": {
+          "metodo": "Expo Go + tunnel", 
+          "url_testing": "exp://localhost:19000",
+          "requisitos": "iOS 13.0+, Expo Go app"
+        },
+        "web_responsive": {
+          "url": "http://localhost:3002",
+          "navegadores": ["Chrome mobile", "Safari mobile"]
+        }
+      },
+      "datos_gps_test": {
+        "ubicacion_yelo_soria": {
+          "lat": 41.789,
+          "lng": -2.123,
+          "precision": "GPS real campo"
+        },
+        "coordenadas_parcelas": "Coordenadas reales Soria para testing GPS"
+      }
+    }
+  }
+}

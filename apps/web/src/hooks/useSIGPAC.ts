@@ -1,6 +1,6 @@
 // hooks/useSIGPAC.ts - Hook para integración SIGPAC
 import { useState, useCallback } from 'react';
-import { api } from '../lib/api';
+import { apiClient } from '../lib/api';
 
 interface SIGPACParcela {
   referencia: {
@@ -63,7 +63,7 @@ export const useSIGPAC = () => {
     setError(null);
 
     try {
-      const response = await api.get(`/sigpac/parcela/${encodeURIComponent(referencia)}`);
+      const response = await apiClient.get(`/sigpac/parcela/${encodeURIComponent(referencia)}`);
       
       if (response.data.success) {
         return response.data.data;
@@ -90,7 +90,7 @@ export const useSIGPAC = () => {
     setError(null);
 
     try {
-      const response = await api.post('/sigpac/parcelas/search', {
+      const response = await apiClient.post('/sigpac/parcelas/search', {
         lat,
         lng,
         radius
@@ -117,7 +117,7 @@ export const useSIGPAC = () => {
     setError(null);
 
     try {
-      const response = await api.post('/sigpac/referencias/validate', {
+      const response = await apiClient.post('/sigpac/referencias/validate', {
         referencias
       });
 
@@ -142,7 +142,7 @@ export const useSIGPAC = () => {
     setError(null);
 
     try {
-      const response = await api.get('/sigpac/provincias');
+      const response = await apiClient.get('/sigpac/provincias');
 
       if (response.data.success) {
         return response.data.data || [];
@@ -162,7 +162,7 @@ export const useSIGPAC = () => {
   // Health check del servicio
   const checkHealth = useCallback(async () => {
     try {
-      const response = await api.get('/sigpac/health');
+      const response = await apiClient.get('/sigpac/health');
       return response.data;
     } catch (err: any) {
       console.error('Error en health check SIGPAC:', err);

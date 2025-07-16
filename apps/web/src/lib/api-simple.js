@@ -1,5 +1,5 @@
 // Simple API configuration for immediate testing
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3004';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
 class ApiClient {
   constructor() {
@@ -66,16 +66,16 @@ export const api = {
   health: () => apiClient.get('/health'),
   
   auth: {
-    status: () => apiClient.get('/api/auth/status'),
-    me: () => apiClient.get('/api/auth/me'),
+    status: () => apiClient.get('/api/v1/auth/status'),
+    me: () => apiClient.get('/api/v1/auth/me'),
   },
 
   parcelas: {
-    getAll: () => apiClient.get('/api/parcelas'),
+    getAll: () => apiClient.get('/api/v1/parcelas'),
   },
 
   actividades: {
-    getAll: () => apiClient.get('/api/actividades'),
+    getAll: () => apiClient.get('/api/v1/actividades'),
   },
 };
 

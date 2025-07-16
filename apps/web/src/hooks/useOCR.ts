@@ -1,6 +1,6 @@
 // hooks/useOCR.ts - Hook para integración OCR
 import { useState, useCallback } from 'react';
-import { api } from '../lib/api';
+import { apiClient } from '../lib/api';
 
 interface ProductInfo {
   nombre_comercial?: string;
@@ -98,16 +98,10 @@ export const useOCR = () => {
 
       setProgress(25);
 
-      const response = await api.post('/ocr/process', formData, {
+      const response = await apiClient.post('/ocr/process', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
-        onUploadProgress: (progressEvent) => {
-          if (progressEvent.total) {
-            const uploadProgress = Math.round((progressEvent.loaded * 50) / progressEvent.total) + 25;
-            setProgress(uploadProgress);
-          }
-        }
       });
 
       setProgress(100);
@@ -164,16 +158,10 @@ export const useOCR = () => {
 
       setProgress(25);
 
-      const response = await api.post('/ocr/batch', formData, {
+      const response = await apiClient.post('/ocr/batch', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
-        onUploadProgress: (progressEvent) => {
-          if (progressEvent.total) {
-            const uploadProgress = Math.round((progressEvent.loaded * 75) / progressEvent.total) + 25;
-            setProgress(uploadProgress);
-          }
-        }
       });
 
       setProgress(100);
@@ -204,7 +192,7 @@ export const useOCR = () => {
       const formData = new FormData();
       formData.append('image', file);
 
-      const response = await api.post('/ocr/job', formData, {
+      const response = await apiClient.post('/ocr/job', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         }
@@ -229,7 +217,7 @@ export const useOCR = () => {
   // Obtener estado de job
   const getJobStatus = useCallback(async (jobId: string): Promise<OCRJobStatus | null> => {
     try {
-      const response = await api.get(`/ocr/job/${jobId}`);
+      const response = await apiClient.get(`/ocr/job/${jobId}`);
 
       if (response.data.success) {
         return response.data.data;
@@ -248,7 +236,7 @@ export const useOCR = () => {
   // Obtener patrones disponibles
   const getPatterns = useCallback(async () => {
     try {
-      const response = await api.get('/ocr/patterns');
+      const response = await apiClient.get('/ocr/patterns');
 
       if (response.data.success) {
         return response.data.data || [];
@@ -267,7 +255,7 @@ export const useOCR = () => {
   // Health check del servicio
   const checkHealth = useCallback(async () => {
     try {
-      const response = await api.get('/ocr/health');
+      const response = await apiClient.get('/ocr/health');
       return response.data;
     } catch (err: any) {
       console.error('Error en health check OCR:', err);
@@ -278,7 +266,7 @@ export const useOCR = () => {
   // Test del servicio
   const testOCR = useCallback(async () => {
     try {
-      const response = await api.post('/ocr/test');
+      const response = await apiClient.post('/ocr/test');
       return response.data;
     } catch (err: any) {
       console.error('Error en test OCR:', err);

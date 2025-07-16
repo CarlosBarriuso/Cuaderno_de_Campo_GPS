@@ -38,6 +38,7 @@ export function AuthNavigation() {
               <Link href="/actividades" className="hover:text-green-200">Actividades</Link>
               <Link href="/mapa" className="hover:text-green-200">Mapa</Link>
               <Link href="/sigpac" className="hover:text-green-200">SIGPAC</Link>
+              <Link href="/subscription" className="hover:text-green-200">Suscripción</Link>
             </div>
           )}
           
@@ -47,14 +48,18 @@ export function AuthNavigation() {
               <div className="flex items-center space-x-3">
                 {/* Subscription Info */}
                 {subscription && (
-                  <div className="hidden lg:flex flex-col items-end text-xs">
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getPlanColor(subscription.plan)}`}>
-                      {getPlanDisplayName(subscription.plan)}
+                  <Link 
+                    href="/subscription" 
+                    className="hidden lg:flex flex-col items-end text-xs hover:opacity-80 hover:scale-105 transition-all duration-200 cursor-pointer"
+                    title="Click para gestionar tu suscripción"
+                  >
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getPlanColor(subscription.plan)} border border-white/20`}>
+                      {getPlanDisplayName(subscription.plan)} →
                     </span>
                     <span className={`text-xs mt-1 ${isNearLimit() ? 'text-yellow-200' : 'text-green-100'}`}>
-                      {subscription.hectareasUsadas}/{subscription.hectareasLimite} ha ({getUsagePercentage()}%)
+                      {subscription.hectareasUsadas || 0}/{subscription.hectareasLimite || subscription.max_parcelas || 1} parcelas ({getUsagePercentage()}%)
                     </span>
-                  </div>
+                  </Link>
                 )}
                 
                 <span className="text-sm text-green-100">
@@ -96,6 +101,7 @@ export function AuthNavigation() {
             <Link href="/actividades" className="text-sm hover:text-green-200">Actividades</Link>
             <Link href="/mapa" className="text-sm hover:text-green-200">Mapa</Link>
             <Link href="/sigpac" className="text-sm hover:text-green-200">SIGPAC</Link>
+            <Link href="/subscription" className="text-sm hover:text-green-200">Suscripción</Link>
           </div>
         </div>
       )}

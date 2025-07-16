@@ -78,18 +78,32 @@ async def login(request: LoginRequest):
 
 @router.get("/me")
 async def get_current_user_info(current_user: dict = Depends(get_current_user)):
-    """Get current authenticated user information"""
+    """Get current authenticated user information with subscription details"""
     
     try:
+        # Get user subscription data (mock for now)
+        user_subscription = {
+            "plan": "basico",
+            "status": "active", 
+            "hectareasLimite": 25,
+            "hectareasUsadas": 12,
+            "fechaInicio": "2025-01-15T00:00:00Z",
+            "fechaVencimiento": "2025-08-15T00:00:00Z",
+            "precio": 24.99,
+            "moneda": "EUR"
+        }
+        
         return {
             "success": True,
             "data": {
-                "user": current_user,
+                "id": current_user.get("id"),
+                "email": current_user.get("email"),
+                "firstName": current_user.get("first_name"),
+                "lastName": current_user.get("last_name"),
                 "authenticated": True,
                 "clerk_id": current_user.get("clerk_id"),
-                "email": current_user.get("email"),
-                "first_name": current_user.get("first_name"),
-                "last_name": current_user.get("last_name")
+                "subscription": user_subscription,
+                "user": current_user
             }
         }
         

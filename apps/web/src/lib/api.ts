@@ -1,6 +1,6 @@
 // API configuration and utilities for frontend
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3004'; // Using auth test server
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'; // Using FastAPI backend
 
 interface ApiResponse<T = any> {
   success: boolean
@@ -121,35 +121,45 @@ export const api = {
   
   // Authentication endpoints
   auth: {
-    login: (credentials: any) => apiClient.post('/api/auth/login', credentials),
-    logout: () => apiClient.post('/api/auth/logout'),
-    refresh: () => apiClient.post('/api/auth/refresh'),
-    status: () => apiClient.get('/api/auth/status'),
-    me: () => apiClient.get('/api/auth/me'),
+    login: (credentials: any) => apiClient.post('/api/v1/auth/login', credentials),
+    logout: () => apiClient.post('/api/v1/auth/logout'),
+    refresh: () => apiClient.post('/api/v1/auth/refresh'),
+    status: () => apiClient.get('/api/v1/auth/status'),
+    me: () => apiClient.get('/api/v1/auth/me'),
+  },
+
+  // Subscription endpoints
+  subscription: {
+    plans: () => apiClient.get('/api/v1/subscription/plans'),
+    current: () => apiClient.get('/api/v1/subscription/current'),
+    upgrade: (planId: string) => apiClient.post('/api/v1/subscription/upgrade', { plan_id: planId }),
+    cancel: (data?: any) => apiClient.post('/api/v1/subscription/cancel', data),
+    usage: () => apiClient.get('/api/v1/subscription/usage'),
+    billingHistory: (limit?: number) => apiClient.get(`/api/v1/subscription/billing/history${limit ? `?limit=${limit}` : ''}`),
   },
 
   // Parcelas endpoints
   parcelas: {
-    getAll: () => apiClient.get('/api/parcelas'),
-    getById: (id: string) => apiClient.get(`/api/parcelas/${id}`),
-    create: (data: any) => apiClient.post('/api/parcelas', data),
-    update: (id: string, data: any) => apiClient.put(`/api/parcelas/${id}`, data),
-    delete: (id: string) => apiClient.delete(`/api/parcelas/${id}`),
+    getAll: () => apiClient.get('/api/v1/parcelas'),
+    getById: (id: string) => apiClient.get(`/api/v1/parcelas/${id}`),
+    create: (data: any) => apiClient.post('/api/v1/parcelas', data),
+    update: (id: string, data: any) => apiClient.put(`/api/v1/parcelas/${id}`, data),
+    delete: (id: string) => apiClient.delete(`/api/v1/parcelas/${id}`),
   },
 
   // Actividades endpoints
   actividades: {
-    getAll: (parcelaId?: string) => apiClient.get(`/api/actividades${parcelaId ? `?parcela=${parcelaId}` : ''}`),
-    getById: (id: string) => apiClient.get(`/api/actividades/${id}`),
-    create: (data: any) => apiClient.post('/api/actividades', data),
-    update: (id: string, data: any) => apiClient.put(`/api/actividades/${id}`, data),
-    delete: (id: string) => apiClient.delete(`/api/actividades/${id}`),
+    getAll: (parcelaId?: string) => apiClient.get(`/api/v1/actividades${parcelaId ? `?parcela=${parcelaId}` : ''}`),
+    getById: (id: string) => apiClient.get(`/api/v1/actividades/${id}`),
+    create: (data: any) => apiClient.post('/api/v1/actividades', data),
+    update: (id: string, data: any) => apiClient.put(`/api/v1/actividades/${id}`, data),
+    delete: (id: string) => apiClient.delete(`/api/v1/actividades/${id}`),
   },
 
   // SIGPAC endpoints
   sigpac: {
-    getByReference: (referencia: string) => apiClient.get(`/api/sigpac/${referencia}`),
-    validateReference: (referencia: string) => apiClient.get(`/api/sigpac/validate/${referencia}`),
+    getByReference: (referencia: string) => apiClient.get(`/api/v1/sigpac/${referencia}`),
+    validateReference: (referencia: string) => apiClient.get(`/api/v1/sigpac/validate/${referencia}`),
   },
 };
 

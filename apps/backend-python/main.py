@@ -49,12 +49,14 @@ app = FastAPI(
 security = HTTPBearer(auto_error=False)
 
 # CORS Configuration
+cors_origins = ["*"] if settings.DEBUG else settings.parse_cors_origins(settings.CORS_ORIGINS)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.parse_cors_origins(settings.CORS_ORIGINS),
+    allow_origins=cors_origins,
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["*"]
 )
 
 # Trusted host middleware

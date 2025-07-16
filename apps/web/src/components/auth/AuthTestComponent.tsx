@@ -48,7 +48,7 @@ export function AuthTestComponent() {
       try {
         // Temporarily clear token to test unauthenticated state
         api.setAuthToken(null)
-        const statusData = await api.auth.status?.() || await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/status`).then(r => r.json())
+        const statusData = await api.auth.status()
         addTestResult('Auth Status (No Token)', true, statusData)
       } catch (error) {
         addTestResult('Auth Status (No Token)', false, null, error)
@@ -68,9 +68,8 @@ export function AuthTestComponent() {
 
         // Test 4: Auth status with token
         try {
-          const statusData = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/status`, {
-            headers: { 'Authorization': 'Bearer test-token' }
-          }).then(r => r.json())
+          api.setAuthToken('test-token')
+          const statusData = await api.auth.status()
           addTestResult('Auth Status (With Token)', true, statusData)
         } catch (error) {
           addTestResult('Auth Status (With Token)', false, null, error)
@@ -78,12 +77,26 @@ export function AuthTestComponent() {
 
         // Test 5: Get user info
         try {
-          const userData = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/me`, {
-            headers: { 'Authorization': 'Bearer test-token' }
-          }).then(r => r.json())
+          const userData = await api.auth.me()
           addTestResult('Get User Info', true, userData)
         } catch (error) {
           addTestResult('Get User Info', false, null, error)
+        }
+
+        // Test 6: Get subscription plans
+        try {
+          const plansData = await api.subscription.plans()
+          addTestResult('Get Subscription Plans', true, plansData)
+        } catch (error) {
+          addTestResult('Get Subscription Plans', false, null, error)
+        }
+
+        // Test 7: Get current subscription
+        try {
+          const currentData = await api.subscription.current()
+          addTestResult('Get Current Subscription', true, currentData)
+        } catch (error) {
+          addTestResult('Get Current Subscription', false, null, error)
         }
 
         // Test 6: Protected endpoint - Parcelas

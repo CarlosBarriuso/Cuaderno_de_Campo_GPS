@@ -144,14 +144,17 @@ SUBSCRIPTION_PLANS = [
 ]
 
 
-@router.get("/plans", response_model=List[SubscriptionPlan])
+@router.get("/plans")
 async def get_subscription_plans():
     """Get all available subscription plans"""
     
     try:
         plans = [SubscriptionPlan(**plan) for plan in SUBSCRIPTION_PLANS]
         
-        return plans
+        return {
+            "success": True,
+            "data": plans
+        }
         
     except Exception as e:
         logger.error(f"Error getting subscription plans: {e}")
@@ -206,22 +209,62 @@ async def get_current_subscription(current_user: dict = Depends(get_current_user
     """Get current user's subscription status"""
     
     try:
-        # Mock subscription data for development
-        # In production, this would query the database
-        mock_subscription = {
-            "user_id": current_user.get("id"),
-            "plan_id": "plan_basic",
-            "plan_name": "Básico",
+        # Get user information from Clerk
+        user_id = current_user.get("id")
+        user_email = current_user.get("email_addresses", [{}])[0].get("email_address")
+        user_name = current_user.get("first_name") or current_user.get("email_addresses", [{}])[0].get("email_address")
+        
+        logger.info(f"Getting subscription for user: {user_id} ({user_email})")
+        
+        # Get user's plan (mock data - in production this would come from database)
+        # For demo purposes, we'll vary the plan based on user email
+        if user_email and "premium" in user_email.lower():
+            plan_id = "plan_professional"
+        elif user_email and "enterprise" in user_email.lower():
+            plan_id = "plan_enterprise"
+        else:
+            plan_id = "plan_basic"  # Default plan
+            
+        # Find the plan details
+        plan_details = None
+        for plan in SUBSCRIPTION_PLANS:
+            if plan["id"] == plan_id:
+                plan_details = plan
+                break
+        
+        if not plan_details:
+            plan_details = SUBSCRIPTION_PLANS[0]  # Default to first plan
+            
+        # Create enhanced subscription response
+        subscription_data = {
+            "user_id": user_id,
+            "user_email": user_email,
+            "user_name": user_name,
+            "plan": plan_id,
+            "plan_name": plan_details["name"],
             "status": "active",
+            "max_parcelas": plan_details["max_parcelas"],
+            "max_actividades": plan_details["max_actividades"],
+            "storage_gb": plan_details["storage_gb"],
+            "ocr_monthly_limit": plan_details["ocr_monthly_limit"],
+            "weather_api_calls": plan_details["weather_api_calls"],
+            "priority_support": plan_details["priority_support"],
+            "advanced_analytics": plan_details["advanced_analytics"],
+            "export_formats": plan_details["export_formats"],
             "current_period_start": "2025-01-15T00:00:00Z",
             "current_period_end": "2025-02-15T00:00:00Z",
             "cancel_at_period_end": False,
-            "trial_end": None
+            "trial_end": None,
+            # Legacy fields for backward compatibility
+            "hectareasLimite": plan_details["max_parcelas"],
+            "hectareasUsadas": 0,  # Would come from usage tracking
+            "precio": plan_details["price"],
+            "moneda": plan_details["currency"]
         }
         
         return {
             "success": True,
-            "data": SubscriptionStatus(**mock_subscription)
+            "data": subscription_data
         }
         
     except Exception as e:
@@ -236,16 +279,19 @@ async def get_current_subscription(current_user: dict = Depends(get_current_user
         )
 
 
+class UpgradeRequest(BaseModel):
+    plan_id: str
+
 @router.post("/upgrade")
 async def upgrade_subscription(
-    plan_id: str,
+    upgrade_request: UpgradeRequest,
     current_user: dict = Depends(get_current_user)
 ):
     """Upgrade user's subscription to a new plan"""
     
     try:
         # Verify plan exists
-        plan = next((plan for plan in SUBSCRIPTION_PLANS if plan["id"] == plan_id), None)
+        plan = next((plan for plan in SUBSCRIPTION_PLANS if plan["id"] == upgrade_request.plan_id), None)
         
         if not plan:
             raise HTTPException(
@@ -253,20 +299,20 @@ async def upgrade_subscription(
                 detail={
                     "success": False,
                     "error": "Plan not found",
-                    "message": f"Subscription plan {plan_id} not found"
+                    "message": f"Subscription plan {upgrade_request.plan_id} not found"
                 }
             )
         
         # Mock upgrade response
         # In production, this would handle payment processing
-        logger.info(f"User {current_user.get('email')} upgrading to plan {plan_id}")
+        logger.info(f"User {current_user.get('email')} upgrading to plan {upgrade_request.plan_id}")
         
         return {
             "success": True,
             "data": {
                 "message": "Subscription upgraded successfully",
                 "new_plan": plan["name"],
-                "plan_id": plan_id,
+                "plan_id": upgrade_request.plan_id,
                 "user_id": current_user.get("id"),
                 "effective_date": "2025-07-15T13:45:00Z"
             }

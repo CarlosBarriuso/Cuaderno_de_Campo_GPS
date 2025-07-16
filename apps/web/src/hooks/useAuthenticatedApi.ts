@@ -33,7 +33,7 @@ export function useAuthenticatedApi() {
             
             // Test the authentication immediately
             try {
-              const testResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/status`, {
+              const testResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/status`, {
                 headers: {
                   'Authorization': 'Bearer test-token'
                 }

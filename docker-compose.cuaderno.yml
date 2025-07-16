@@ -1,0 +1,98 @@
+version: '3.8'
+
+services:
+  # Next.js Frontend
+  frontend:
+    build:
+      context: ./apps/web
+      dockerfile: Dockerfile
+    container_name: cuaderno_campo_frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - NEXT_PUBLIC_API_URL=http://localhost:3005
+      - NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_aHVtYW5lLWd1cHB5LTIyLmNsZXJrLmFjY291bnRzLmRldiQ
+    volumes:
+      - ./apps/web:/app
+      - /app/node_modules
+      - /app/.next
+    networks:
+      - cuaderno_campo_network
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+  # Node.js Express Backend
+  backend:
+    build:
+      context: ./apps/backend
+      dockerfile: Dockerfile
+    container_name: cuaderno_campo_backend
+    ports:
+      - "3005:3005"
+    environment:
+      - NODE_ENV=development
+      - PORT=3005
+      - DATABASE_URL=postgresql://postgres:password@postgres:5432/cuaderno_campo_dev
+    volumes:
+      - ./apps/backend:/app
+      - /app/node_modules
+    networks:
+      - cuaderno_campo_network
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # PostgreSQL con PostGIS
+  postgres:
+    image: postgis/postgis:16-3.4
+    container_name: cuaderno_campo_postgres
+    environment:
+      POSTGRES_DB: cuaderno_campo_dev
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=es_ES.UTF-8"
+    ports:
+      - "5434:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./tools/database/init:/docker-entrypoint-initdb.d
+    networks:
+      - cuaderno_campo_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d cuaderno_campo_dev"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # Redis para caché
+  redis:
+    image: redis:7-alpine
+    container_name: cuaderno_campo_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - cuaderno_campo_network
+    command: redis-server --appendonly yes --requirepass "redispass"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  cuaderno_campo_network:
+    driver: bridge
+    name: cuaderno_campo_network
