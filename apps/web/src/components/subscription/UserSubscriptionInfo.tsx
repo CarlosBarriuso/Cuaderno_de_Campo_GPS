@@ -5,11 +5,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { useAuthenticatedApi } from '@/hooks/useAuthenticatedApi'
 import { useSubscription } from '@/hooks/useSubscription'
+import { useUser } from '@clerk/nextjs'
 import { UserIcon, CreditCardIcon, CalendarIcon } from '@heroicons/react/24/outline'
 
 export function UserSubscriptionInfo() {
   const { isAuthReady } = useAuthenticatedApi()
-  const { subscription, user, loading, error, getPlanDisplayName, getPlanColor, getUsagePercentage } = useSubscription()
+  const { subscription, loading, error, getPlanDisplayName, getPlanColor, getUsagePercentage } = useSubscription()
+  const { user } = useUser()
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('es-ES', {
@@ -81,9 +83,9 @@ export function UserSubscriptionInfo() {
           </div>
           <div>
             <h3 className="font-semibold text-lg">
-              {user.firstName} {user.lastName}
+              {user?.firstName || 'Usuario'} {user?.lastName || ''}
             </h3>
-            <p className="text-gray-600">{user.email}</p>
+            <p className="text-gray-600">{user?.emailAddresses[0]?.emailAddress || 'email@ejemplo.com'}</p>
           </div>
         </div>
 
@@ -103,7 +105,7 @@ export function UserSubscriptionInfo() {
             <div>
               <div className="text-sm text-gray-500">Precio</div>
               <div className="font-semibold">
-                {formatPrice(subscription.precio, subscription.moneda)}
+                {subscription.precio ? formatPrice(subscription.precio, subscription.moneda || 'EUR') : 'Gratis'}
               </div>
             </div>
             
@@ -119,14 +121,14 @@ export function UserSubscriptionInfo() {
             <div>
               <div className="text-sm text-gray-500">Inicio</div>
               <div className="font-semibold text-sm">
-                {formatDate(subscription.fechaInicio)}
+                {subscription.fechaInicio ? formatDate(subscription.fechaInicio) : 'No disponible'}
               </div>
             </div>
 
             <div>
               <div className="text-sm text-gray-500">Renovación</div>
               <div className="font-semibold text-sm">
-                {formatDate(subscription.fechaVencimiento)}
+                {subscription.fechaVencimiento ? formatDate(subscription.fechaVencimiento) : 'No disponible'}
               </div>
             </div>
           </div>
@@ -138,7 +140,7 @@ export function UserSubscriptionInfo() {
           <div className="space-y-2">
             <div className="flex justify-between text-sm">
               <span>Utilizadas</span>
-              <span>{subscription.hectareasUsadas} / {subscription.hectareasLimite} hectáreas</span>
+              <span>{subscription.hectareasUsadas || 0} / {subscription.hectareasLimite || subscription.max_parcelas || 1} parcelas</span>
             </div>
             <div className="w-full bg-gray-200 rounded-full h-2">
               <div 
