@@ -154,6 +154,36 @@ export function useSubscription() {
     return planColors[plan] || 'bg-gray-100 text-gray-800'
   }
 
+  const getPlanColorHeader = (plan: string) => {
+    const planColors = {
+      plan_free: 'bg-gray-500/20 text-gray-200 border-gray-400/30',
+      plan_basic: 'bg-blue-500/20 text-blue-200 border-blue-400/30',
+      plan_professional: 'bg-green-500/20 text-green-200 border-green-400/30',
+      plan_enterprise: 'bg-purple-500/20 text-purple-200 border-purple-400/30',
+      // Legacy support
+      gratuito: 'bg-gray-500/20 text-gray-200 border-gray-400/30',
+      basico: 'bg-blue-500/20 text-blue-200 border-blue-400/30',
+      profesional: 'bg-green-500/20 text-green-200 border-green-400/30',
+      enterprise: 'bg-purple-500/20 text-purple-200 border-purple-400/30'
+    }
+    return planColors[plan] || 'bg-gray-500/20 text-gray-200 border-gray-400/30'
+  }
+
+  const getPlanIcon = (plan: string) => {
+    const planIcons = {
+      plan_free: '🆓',
+      plan_basic: '📊',
+      plan_professional: '🚀',
+      plan_enterprise: '💎',
+      // Legacy support
+      gratuito: '🆓',
+      basico: '📊',
+      profesional: '🚀',
+      enterprise: '💎'
+    }
+    return planIcons[plan] || '📋'
+  }
+
   const getUsagePercentage = () => {
     if (!subscription) return 0
     // Use legacy fields if available, otherwise use max_parcelas as primary metric
@@ -179,6 +209,8 @@ export function useSubscription() {
     error,
     getPlanDisplayName,
     getPlanColor,
+    getPlanColorHeader,
+    getPlanIcon,
     getUsagePercentage,
     isNearLimit,
     isOverLimit,

@@ -4,6 +4,7 @@ import { useUser } from '@clerk/nextjs'
 import { useSubscription } from '@/hooks/useSubscription'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { DashboardPlanCard } from '@/components/subscription/DashboardPlanCard'
 import Link from 'next/link'
 
 export default function Home() {
@@ -31,47 +32,58 @@ export default function Home() {
             )}
           </div>
 
-          {/* Quick Actions */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-            <Link href="/dashboard" className="group">
-              <Card className="h-full hover:shadow-lg transition-shadow">
-                <CardContent className="p-6 text-center">
-                  <div className="text-4xl mb-3">📊</div>
-                  <h3 className="text-lg font-semibold mb-2 group-hover:text-green-600">Dashboard</h3>
-                  <p className="text-gray-600 text-sm">Resumen de tu actividad</p>
-                </CardContent>
-              </Card>
-            </Link>
+          {/* Main Content Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
+            {/* Plan Card - Prominent placement */}
+            <div className="lg:col-span-1">
+              <DashboardPlanCard />
+            </div>
+            
+            {/* Quick Actions */}
+            <div className="lg:col-span-2">
+              <h2 className="text-xl font-semibold text-gray-900 mb-4">Acciones Rápidas</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Link href="/dashboard" className="group">
+                  <Card className="h-full hover:shadow-lg transition-shadow">
+                    <CardContent className="p-6 text-center">
+                      <div className="text-4xl mb-3">📊</div>
+                      <h3 className="text-lg font-semibold mb-2 group-hover:text-green-600">Dashboard</h3>
+                      <p className="text-gray-600 text-sm">Resumen de tu actividad</p>
+                    </CardContent>
+                  </Card>
+                </Link>
 
-            <Link href="/parcelas" className="group">
-              <Card className="h-full hover:shadow-lg transition-shadow">
-                <CardContent className="p-6 text-center">
-                  <div className="text-4xl mb-3">🌾</div>
-                  <h3 className="text-lg font-semibold mb-2 group-hover:text-green-600">Parcelas</h3>
-                  <p className="text-gray-600 text-sm">Gestiona tus parcelas</p>
-                </CardContent>
-              </Card>
-            </Link>
+                <Link href="/parcelas" className="group">
+                  <Card className="h-full hover:shadow-lg transition-shadow">
+                    <CardContent className="p-6 text-center">
+                      <div className="text-4xl mb-3">🌾</div>
+                      <h3 className="text-lg font-semibold mb-2 group-hover:text-green-600">Parcelas</h3>
+                      <p className="text-gray-600 text-sm">Gestiona tus parcelas</p>
+                    </CardContent>
+                  </Card>
+                </Link>
 
-            <Link href="/actividades" className="group">
-              <Card className="h-full hover:shadow-lg transition-shadow">
-                <CardContent className="p-6 text-center">
-                  <div className="text-4xl mb-3">📝</div>
-                  <h3 className="text-lg font-semibold mb-2 group-hover:text-green-600">Actividades</h3>
-                  <p className="text-gray-600 text-sm">Registra actividades</p>
-                </CardContent>
-              </Card>
-            </Link>
+                <Link href="/actividades" className="group">
+                  <Card className="h-full hover:shadow-lg transition-shadow">
+                    <CardContent className="p-6 text-center">
+                      <div className="text-4xl mb-3">📝</div>
+                      <h3 className="text-lg font-semibold mb-2 group-hover:text-green-600">Actividades</h3>
+                      <p className="text-gray-600 text-sm">Registra actividades</p>
+                    </CardContent>
+                  </Card>
+                </Link>
 
-            <Link href="/subscription" className="group">
-              <Card className="h-full hover:shadow-lg transition-shadow">
-                <CardContent className="p-6 text-center">
-                  <div className="text-4xl mb-3">💳</div>
-                  <h3 className="text-lg font-semibold mb-2 group-hover:text-green-600">Suscripción</h3>
-                  <p className="text-gray-600 text-sm">Gestiona tu plan</p>
-                </CardContent>
-              </Card>
-            </Link>
+                <Link href="/mapa" className="group">
+                  <Card className="h-full hover:shadow-lg transition-shadow">
+                    <CardContent className="p-6 text-center">
+                      <div className="text-4xl mb-3">🗺️</div>
+                      <h3 className="text-lg font-semibold mb-2 group-hover:text-green-600">Mapas</h3>
+                      <p className="text-gray-600 text-sm">Visualiza parcelas</p>
+                    </CardContent>
+                  </Card>
+                </Link>
+              </div>
+            </div>
           </div>
 
           {/* Features Section */}

@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { SubscriptionOverview } from '@/components/subscription/SubscriptionOverview'
@@ -10,6 +11,16 @@ import { BillingSettings } from '@/components/subscription/BillingSettings'
 import { CreditCardIcon, ChartBarIcon, CogIcon } from '@heroicons/react/24/outline'
 
 export default function SubscriptionPage() {
+  const searchParams = useSearchParams()
+  const [activeTab, setActiveTab] = useState('overview')
+
+  useEffect(() => {
+    const tab = searchParams.get('tab')
+    if (tab && ['overview', 'plans', 'settings'].includes(tab)) {
+      setActiveTab(tab)
+    }
+  }, [searchParams])
+
   return (
     <div className="container mx-auto p-6 max-w-7xl">
       <div className="mb-8">
@@ -19,7 +30,7 @@ export default function SubscriptionPage() {
         </p>
       </div>
 
-      <Tabs defaultValue="overview" className="space-y-6">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="overview" className="flex items-center space-x-2">
             <ChartBarIcon className="h-4 w-4" />

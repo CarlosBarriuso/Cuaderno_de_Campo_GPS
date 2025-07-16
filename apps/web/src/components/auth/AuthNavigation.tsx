@@ -3,10 +3,11 @@
 import { SignInButton, SignUpButton, UserButton, useUser } from '@clerk/nextjs'
 import Link from 'next/link'
 import { useSubscription } from '@/hooks/useSubscription'
+import { UserDropdown } from '@/components/user/UserDropdown'
 
 export function AuthNavigation() {
   const { isSignedIn, user, isLoaded } = useUser()
-  const { subscription, getPlanDisplayName, getPlanColor, getUsagePercentage, isNearLimit } = useSubscription()
+  const { subscription, getPlanDisplayName, getPlanColor, getPlanColorHeader, getPlanIcon, getUsagePercentage, isNearLimit } = useSubscription()
 
   // Show loading state while Clerk is initializing
   if (!isLoaded) {
@@ -45,26 +46,30 @@ export function AuthNavigation() {
           {/* Authentication Section */}
           <div className="flex items-center space-x-3">
             {isSignedIn ? (
-              <div className="flex items-center space-x-3">
-                {/* Subscription Info */}
+              <div className="flex items-center space-x-4">
+                {/* Subscription Info - Improved with better visual hierarchy */}
                 {subscription && (
                   <Link 
                     href="/subscription" 
-                    className="hidden lg:flex flex-col items-end text-xs hover:opacity-80 hover:scale-105 transition-all duration-200 cursor-pointer"
+                    className="hidden lg:flex flex-col items-end text-xs hover:opacity-80 hover:scale-105 transition-all duration-200 cursor-pointer group"
                     title="Click para gestionar tu suscripción"
                   >
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getPlanColor(subscription.plan)} border border-white/20`}>
-                      {getPlanDisplayName(subscription.plan)} →
-                    </span>
+                    <div className="flex items-center space-x-2">
+                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${getPlanColorHeader(subscription.plan)} border group-hover:border-white/40`}>
+                        {getPlanIcon(subscription.plan)} {getPlanDisplayName(subscription.plan)}
+                      </span>
+                      <span className="text-white/70 group-hover:text-white text-xs">→</span>
+                    </div>
                     <span className={`text-xs mt-1 ${isNearLimit() ? 'text-yellow-200' : 'text-green-100'}`}>
                       {subscription.hectareasUsadas || 0}/{subscription.hectareasLimite || subscription.max_parcelas || 1} parcelas ({getUsagePercentage()}%)
                     </span>
                   </Link>
                 )}
                 
-                <span className="text-sm text-green-100">
-                  Hola, {user.firstName || user.emailAddresses[0]?.emailAddress}
-                </span>
+                {/* User Dropdown */}
+                <UserDropdown />
+                
+                {/* Clerk UserButton as fallback */}
                 <UserButton 
                   afterSignOutUrl="/"
                   appearance={{
