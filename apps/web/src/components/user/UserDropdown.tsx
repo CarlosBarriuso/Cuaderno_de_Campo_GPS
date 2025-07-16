@@ -9,7 +9,7 @@ import { ChevronDownIcon, CreditCardIcon, UserIcon, Cog6ToothIcon, ArrowRightOnR
 export function UserDropdown() {
   const { user } = useUser()
   const { signOut } = useClerk()
-  const { subscription, getPlanDisplayName, getPlanColor } = useSubscription()
+  const { subscription, getPlanDisplayName, getPlanColor, loading } = useSubscription()
   const [isOpen, setIsOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
@@ -64,15 +64,42 @@ export function UserDropdown() {
           </div>
 
           {/* Plan Information */}
-          {subscription && (
+          {loading ? (
+            <div className="px-4 py-3 border-b border-gray-100">
+              <div className="animate-pulse">
+                <div className="h-3 bg-gray-200 rounded w-1/2 mb-2"></div>
+                <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+              </div>
+            </div>
+          ) : subscription ? (
             <div className="px-4 py-3 border-b border-gray-100">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">
                     Plan actual
                   </p>
-                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getPlanColor(subscription.plan).replace('bg-', 'bg-').replace('text-', 'text-')}`}>
+                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getPlanColor(subscription.plan)}`}>
                     {getPlanDisplayName(subscription.plan)}
+                  </span>
+                </div>
+                <Link
+                  href="/subscription"
+                  onClick={() => setIsOpen(false)}
+                  className="text-xs text-green-600 hover:text-green-700 font-medium"
+                >
+                  Cambiar →
+                </Link>
+              </div>
+            </div>
+          ) : (
+            <div className="px-4 py-3 border-b border-gray-100">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+                    Plan actual
+                  </p>
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                    Gratuito
                   </span>
                 </div>
                 <Link

@@ -5,6 +5,7 @@ import { useSubscription } from '@/hooks/useSubscription'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { DashboardPlanCard } from '@/components/subscription/DashboardPlanCard'
+import { SubscriptionDebug } from '@/components/debug/SubscriptionDebug'
 import Link from 'next/link'
 
 export default function Home() {
@@ -137,6 +138,9 @@ export default function Home() {
             </div>
           </div>
         </div>
+        
+        {/* Debug Component */}
+        <SubscriptionDebug />
       </div>
     )
   }

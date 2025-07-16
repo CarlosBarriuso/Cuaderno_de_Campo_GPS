@@ -66,18 +66,8 @@ export function AuthNavigation() {
                   </Link>
                 )}
                 
-                {/* User Dropdown */}
+                {/* User Dropdown - Custom implementation */}
                 <UserDropdown />
-                
-                {/* Clerk UserButton as fallback */}
-                <UserButton 
-                  afterSignOutUrl="/"
-                  appearance={{
-                    elements: {
-                      avatarBox: "w-8 h-8"
-                    }
-                  }}
-                />
               </div>
             ) : (
               <div className="flex items-center space-x-3">
