@@ -12,9 +12,12 @@ class ApiClient {
   setAuthToken(token) {
     if (token) {
       this.defaultHeaders.Authorization = `Bearer ${token}`;
+      console.log('🔑 Token set in API client:', token.substring(0, 20) + '...');
     } else {
       delete this.defaultHeaders.Authorization;
+      console.log('🔑 Token cleared from API client');
     }
+    console.log('📝 Current headers:', this.defaultHeaders);
   }
 
   async request(endpoint, options = {}) {
@@ -27,6 +30,12 @@ class ApiClient {
       },
       ...options,
     };
+
+    console.log('🌐 Making API request:', {
+      url,
+      method: config.method || 'GET',
+      headers: config.headers
+    });
 
     try {
       const response = await fetch(url, config);
@@ -72,12 +81,30 @@ export const api = {
 
   parcelas: {
     getAll: () => apiClient.get('/api/v1/parcelas'),
+    create: (data) => apiClient.post('/api/v1/parcelas/', data),
+    update: (id, data) => apiClient.request(`/api/v1/parcelas/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    }),
+    delete: (id) => apiClient.request(`/api/v1/parcelas/${id}`, {
+      method: 'DELETE',
+    }),
+    findByLocation: (coordinates) => apiClient.post('/api/v1/parcelas/find-by-location', coordinates),
   },
 
   actividades: {
     getAll: () => apiClient.get('/api/v1/actividades'),
+    create: (data) => apiClient.post('/api/v1/actividades/', data),
+    update: (id, data) => apiClient.request(`/api/v1/actividades/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    }),
+    delete: (id) => apiClient.request(`/api/v1/actividades/${id}`, {
+      method: 'DELETE',
+    }),
+    getStats: () => apiClient.get('/api/v1/actividades/stats'),
   },
 };
 
 export { apiClient };
-export default apiClient;
+export default api;

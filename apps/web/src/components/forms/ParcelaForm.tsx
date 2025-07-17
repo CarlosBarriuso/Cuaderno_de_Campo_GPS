@@ -10,6 +10,7 @@ const parcelaSchema = z.object({
   nombre: z.string().min(1, 'El nombre de la parcela es requerido'),
   superficie: z.number().min(0.01, 'La superficie debe ser mayor a 0').max(10000, 'Superficie máxima 10,000 ha'),
   cultivo: z.string().min(1, 'El tipo de cultivo es requerido'),
+  tipo_cultivo: z.string().min(1, 'El tipo de cultivo es requerido'),
   variedad: z.string().optional(),
   fechaSiembra: z.string().optional(),
   sistemaRiego: z.string().optional(),
@@ -29,6 +30,46 @@ const parcelaSchema = z.object({
 });
 
 type ParcelaFormData = z.infer<typeof parcelaSchema>;
+
+// Mapping de cultivos a tipos de cultivo del backend
+const cultivoToTipoCultivo = {
+  // Cereales
+  'trigo': 'CEREAL_SECANO',
+  'cebada': 'CEREAL_SECANO', 
+  'avena': 'CEREAL_SECANO',
+  'maiz': 'CEREAL_REGADIO',
+  'arroz': 'CEREAL_REGADIO',
+  
+  // Oleaginosas
+  'girasol': 'CEREAL_SECANO',
+  'soja': 'LEGUMINOSA',
+  'colza': 'CEREAL_SECANO',
+  
+  // Frutales
+  'olivo': 'OLIVAR',
+  'vid': 'VINEDO',
+  'almendro': 'FRUTAL',
+  'naranjo': 'FRUTAL',
+  'limonero': 'FRUTAL', 
+  'manzano': 'FRUTAL',
+  
+  // Hortalizas
+  'tomate': 'HORTALIZA_AIRE_LIBRE',
+  'pimiento': 'HORTALIZA_AIRE_LIBRE',
+  'lechuga': 'HORTALIZA_AIRE_LIBRE',
+  'brocoli': 'HORTALIZA_AIRE_LIBRE',
+  'patata': 'HORTALIZA_AIRE_LIBRE',
+  'cebolla': 'HORTALIZA_AIRE_LIBRE',
+  
+  // Leguminosas
+  'guisante': 'LEGUMINOSA',
+  'garbanzo': 'LEGUMINOSA',
+  'lenteja': 'LEGUMINOSA',
+  'alfalfa': 'FORRAJE',
+  
+  // Barbecho
+  'barbecho': 'BARBECHO',
+} as const;
 
 interface ParcelaFormProps {
   onSubmit: (data: ParcelaFormData) => void;
@@ -55,6 +96,13 @@ export function ParcelaForm({
     resolver: zodResolver(parcelaSchema),
     defaultValues: initialData,
   });
+
+  // Función para manejar el cambio de cultivo y mapear tipo_cultivo
+  const handleCultivoChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const cultivo = e.target.value;
+    const tipoCultivo = cultivoToTipoCultivo[cultivo as keyof typeof cultivoToTipoCultivo] || 'OTROS';
+    setValue('tipo_cultivo', tipoCultivo);
+  };
 
   const tiposCultivo = [
     // Cereales
@@ -90,6 +138,9 @@ export function ParcelaForm({
     { value: 'garbanzo', label: 'Garbanzo', categoria: 'leguminosas' },
     { value: 'lenteja', label: 'Lenteja', categoria: 'leguminosas' },
     { value: 'alfalfa', label: 'Alfalfa', categoria: 'leguminosas' },
+    
+    // Barbecho
+    { value: 'barbecho', label: 'Barbecho', categoria: 'barbecho' },
   ];
 
   const sistemasRiego = [
@@ -190,6 +241,7 @@ export function ParcelaForm({
             </label>
             <select
               {...register('cultivo')}
+              onChange={handleCultivoChange}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
             >
               <option value="">Seleccionar cultivo...</option>

@@ -7,6 +7,8 @@ Se ha completado con éxito la **Fase 1** del proyecto: implementación de la in
 
 **ACTUALIZACIÓN JULIO 2025**: Se ha implementado un **sistema completo de suscripciones** integrado con Clerk, que incluye gestión de planes, facturación, cancelaciones y middleware de límites. Ver [SISTEMA_SUSCRIPCIONES_JULIO_2025.md](./SISTEMA_SUSCRIPCIONES_JULIO_2025.md) para detalles completos.
 
+**NUEVAS MEJORAS JULIO 2025**: Se ha completado la **integración de actividades con geolocalización GPS**, incluyendo detección automática de parcelas, esquema de base de datos actualizado y correcciones de interfaz. Ver [MEJORAS_ACTIVIDADES_JULIO_2025.md](./MEJORAS_ACTIVIDADES_JULIO_2025.md) para detalles técnicos.
+
 ## ✅ Componentes Implementados
 
 ### 🔧 Backend API
@@ -97,13 +99,20 @@ cuaderno-campo-gps/
 - [x] Configuración CORS y seguridad
 - [x] Logging estructurado
 - [x] Documentación automática OpenAPI
+- [x] **✅ NUEVO**: APIs CRUD completas para actividades
+- [x] **✅ NUEVO**: Endpoint geoespacial con PostGIS para detección GPS
+- [x] **✅ NUEVO**: Consultas espaciales para parcelas
 
 ### Base de Datos
-- [x] Schema Prisma completo (Users, Parcelas, Actividades, Productos)
+- [x] Schema completo (Users, Parcelas, Actividades, Productos)
 - [x] Funciones PostGIS para agricultura española
 - [x] Validaciones geoespaciales
-- [x] Cliente Prisma generado y configurado
+- [x] Cliente SQLAlchemy configurado
 - [x] Docker Compose con PostgreSQL + PostGIS + Redis
+- [x] **✅ NUEVO**: Esquema de actividades actualizado con modelo SQLAlchemy
+- [x] **✅ NUEVO**: Tipos ENUM para actividades (TipoActividad, EstadoActividad)
+- [x] **✅ NUEVO**: Campos geoespaciales y metadatos extendidos
+- [x] **✅ NUEVO**: Migración ejecutada para compatibilidad
 
 ### Frontend Web
 - [x] Configuración Next.js 14 con App Router
@@ -113,6 +122,12 @@ cuaderno-campo-gps/
 - [x] Sistema de componentes UI (Button, Card, Badge)
 - [x] Configuración de variables de entorno
 - [x] Integración Clerk para autenticación
+- [x] **✅ NUEVO**: Formulario de actividades con geolocalización GPS
+- [x] **✅ NUEVO**: Integración actividades-parcelas con dropdown inteligente
+- [x] **✅ NUEVO**: Botón "Detectar Parcela por GPS" con alta precisión
+- [x] **✅ NUEVO**: Cultivo 'Barbecho' añadido a opciones
+- [x] **✅ NUEVO**: Consistencia UI en planes de suscripción
+- [x] **✅ NUEVO**: Hook useClerkSubscription estandarizado
 
 ### Aplicación Móvil
 - [x] Estructura Expo con navegación por tabs

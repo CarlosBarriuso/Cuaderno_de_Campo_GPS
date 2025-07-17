@@ -12,18 +12,21 @@ Se ha implementado un **sistema completo de suscripciones** integrado con el sis
 - **Cambio de planes**: Sistema de upgrade/downgrade con modal de confirmación
 - **Cancelación**: Flujo completo con feedback y razones
 - **Historial de facturación**: Visualización y descarga de facturas
+- **✅ Consistencia UI**: Plan mostrado igual en dashboard y header (Julio 2025)
 
 ### 🔗 Integración con Usuario
 - **Datos personalizados**: Cada usuario tiene su propia información de suscripción
 - **Información visible**: Plan actual mostrado en el menú superior como enlace
 - **Navegación intuitiva**: Acceso directo desde cualquier página
 - **Datos relacionados**: Suscripción asociada al user_id de Clerk
+- **✅ Hook unificado**: useClerkSubscription estandarizado en todos los componentes
 
 ### 🎨 Interfaz de Usuario
 - **Menú superior**: Información del plan clickeable que navega a gestión
 - **Dashboard personalizado**: Muestra características del plan actual
 - **Página de inicio**: Adaptada según el estado de autenticación
 - **Componentes especializados**: UserPlanCard, SubscriptionOverview, etc.
+- **✅ UserPlanCard actualizado**: Información consistente con metadata de Clerk
 
 ## 🏗️ Arquitectura Técnica
 

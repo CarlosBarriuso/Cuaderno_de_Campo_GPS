@@ -274,3 +274,112 @@ async def calculate_superficie(
     except Exception as e:
         logger.error(f"Error calculating superficie for parcela {parcela_id}: {e}")
         raise HTTPException(status_code=500, detail="Error calculating superficie")
+
+
+@router.post("/find-by-location")
+async def find_parcela_by_location(
+    location_data: dict,
+    db: AsyncSession = Depends(get_async_session),
+    current_user: dict = Depends(get_current_user)
+):
+    """Find parcela by GPS coordinates using PostGIS spatial queries"""
+    
+    try:
+        # Validate required fields
+        if not all(key in location_data for key in ['latitude', 'longitude']):
+            raise HTTPException(status_code=400, detail="Latitude and longitude are required")
+        
+        lat = float(location_data['latitude'])
+        lng = float(location_data['longitude'])
+        
+        # Validate coordinate ranges
+        if not (-90 <= lat <= 90) or not (-180 <= lng <= 180):
+            raise HTTPException(status_code=400, detail="Invalid GPS coordinates")
+        
+        # Use PostGIS to find parcela containing the point
+        from sqlalchemy import text
+        
+        query = text("""
+            SELECT 
+                id,
+                nombre,
+                superficie,
+                tipo_cultivo,
+                cultivo,
+                ST_Distance(
+                    ST_Transform(geometria, 3857),
+                    ST_Transform(ST_SetSRID(ST_MakePoint(:lng, :lat), 4326), 3857)
+                ) as distance_meters,
+                ST_Contains(geometria, ST_SetSRID(ST_MakePoint(:lng, :lat), 4326)) as within_parcela
+            FROM parcelas 
+            WHERE propietario_id = :user_id 
+                AND activa = true
+                AND geometria IS NOT NULL
+            ORDER BY 
+                ST_Contains(geometria, ST_SetSRID(ST_MakePoint(:lng, :lat), 4326)) DESC,
+                ST_Distance(
+                    ST_Transform(geometria, 3857),
+                    ST_Transform(ST_SetSRID(ST_MakePoint(:lng, :lat), 4326), 3857)
+                ) ASC
+            LIMIT 5
+        """)
+        
+        result = await db.execute(query, {
+            "lat": lat,
+            "lng": lng,
+            "user_id": current_user["id"]
+        })
+        
+        parcelas_found = result.fetchall()
+        
+        if not parcelas_found:
+            return {
+                "success": True,
+                "data": {
+                    "parcela_found": None,
+                    "nearest_parcelas": [],
+                    "coordinates": {"latitude": lat, "longitude": lng},
+                    "message": "No hay parcelas registradas cerca de esta ubicación"
+                }
+            }
+        
+        # Convert results to dictionaries
+        parcelas_list = []
+        exact_match = None
+        
+        for row in parcelas_found:
+            parcela_data = {
+                "id": str(row.id),
+                "nombre": row.nombre,
+                "superficie": float(row.superficie),
+                "tipo_cultivo": row.tipo_cultivo,
+                "cultivo": row.cultivo,
+                "distance_meters": float(row.distance_meters) if row.distance_meters else 0,
+                "within_parcela": bool(row.within_parcela)
+            }
+            
+            parcelas_list.append(parcela_data)
+            
+            # If GPS point is within parcela boundaries
+            if row.within_parcela:
+                exact_match = parcela_data
+        
+        logger.info(f"GPS location check: Found {len(parcelas_list)} parcelas for user {current_user['id']} at ({lat}, {lng})")
+        
+        return {
+            "success": True,
+            "data": {
+                "parcela_found": exact_match,
+                "nearest_parcelas": parcelas_list,
+                "coordinates": {"latitude": lat, "longitude": lng},
+                "message": "Ubicación encontrada dentro de parcela" if exact_match else f"Ubicación cercana a {len(parcelas_list)} parcela(s)"
+            }
+        }
+        
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail="Invalid coordinate format")
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error finding parcela by location: {e}")
+        raise HTTPException(status_code=500, detail="Error processing location data")

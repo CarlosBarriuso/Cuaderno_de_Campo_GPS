@@ -1,7 +1,7 @@
 'use client'
 
 import { useUser } from '@clerk/nextjs'
-import { useSubscription } from '@/hooks/useSubscription'
+import { useClerkSubscription } from '@/hooks/useClerkSubscription'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -18,11 +18,29 @@ export function UserPlanCard() {
   const { 
     subscription, 
     loading, 
-    error, 
-    getPlanDisplayName, 
-    getPlanColor, 
-    getUsagePercentage 
-  } = useSubscription()
+    error
+  } = useClerkSubscription()
+
+  // Helper functions for plan display
+  const getPlanDisplayName = (planId: string) => {
+    const planNames = {
+      'free': 'Gratuito',
+      'basic': 'Básico', 
+      'professional': 'Profesional',
+      'enterprise': 'Enterprise'
+    }
+    return planNames[planId as keyof typeof planNames] || 'Gratuito'
+  }
+
+  const getPlanColor = (planId: string) => {
+    const colors = {
+      'free': 'bg-gray-100 text-gray-800',
+      'basic': 'bg-blue-100 text-blue-800',
+      'professional': 'bg-green-100 text-green-800', 
+      'enterprise': 'bg-purple-100 text-purple-800'
+    }
+    return colors[planId as keyof typeof colors] || 'bg-gray-100 text-gray-800'
+  }
 
   if (loading) {
     return (
@@ -65,15 +83,15 @@ export function UserPlanCard() {
           <div className="space-y-2 text-sm">
             <div className="flex justify-between">
               <span className="text-gray-600">Nombre:</span>
-              <span className="font-medium">{subscription?.user_name || user?.firstName || 'Usuario'}</span>
+              <span className="font-medium">{user?.firstName || 'Usuario'}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-gray-600">Email:</span>
-              <span className="font-medium text-xs">{subscription?.user_email || user?.emailAddresses[0]?.emailAddress}</span>
+              <span className="font-medium text-xs">{user?.emailAddresses[0]?.emailAddress}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-gray-600">ID:</span>
-              <span className="font-mono text-xs text-gray-500">{subscription?.user_id || user?.id}</span>
+              <span className="font-mono text-xs text-gray-500">{user?.id}</span>
             </div>
           </div>
         </div>
@@ -85,8 +103,8 @@ export function UserPlanCard() {
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <span className="text-gray-600">Plan:</span>
-                <Badge className={`${getPlanColor(subscription.plan)} text-sm`}>
-                  {getPlanDisplayName(subscription.plan)}
+                <Badge className={`${getPlanColor(subscription.planId)} text-sm`}>
+                  {getPlanDisplayName(subscription.planId)}
                 </Badge>
               </div>
               
@@ -97,31 +115,32 @@ export function UserPlanCard() {
                 </Badge>
               </div>
 
-              <div className="flex items-center justify-between">
-                <span className="text-gray-600">Precio:</span>
-                <span className="font-medium">
-                  {subscription.precio ? `€${subscription.precio}/mes` : 'Gratis'}
-                </span>
-              </div>
-
-              {/* Usage Information */}
-              <div className="pt-3 border-t">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-gray-600">Uso de parcelas:</span>
+              {subscription.currentPeriodStart && (
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-600">Inicio del período:</span>
                   <span className="text-sm font-medium">
-                    {subscription.hectareasUsadas || 0}/{subscription.hectareasLimite || subscription.max_parcelas}
+                    {new Date(subscription.currentPeriodStart).toLocaleDateString()}
                   </span>
                 </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div 
-                    className="bg-green-600 h-2 rounded-full transition-all duration-300"
-                    style={{ width: `${Math.min(getUsagePercentage(), 100)}%` }}
-                  ></div>
+              )}
+              
+              {subscription.currentPeriodEnd && (
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-600">Renovación:</span>
+                  <span className="text-sm font-medium">
+                    {new Date(subscription.currentPeriodEnd).toLocaleDateString()}
+                  </span>
                 </div>
-                <div className="text-xs text-gray-500 mt-1">
-                  {getUsagePercentage()}% utilizado
+              )}
+              
+              {subscription.cancelAtPeriodEnd && (
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-600">Cancelación:</span>
+                  <Badge className="bg-yellow-100 text-yellow-800 text-xs">
+                    Se cancela al final del período
+                  </Badge>
                 </div>
-              </div>
+              )}
             </div>
           </div>
         )}
