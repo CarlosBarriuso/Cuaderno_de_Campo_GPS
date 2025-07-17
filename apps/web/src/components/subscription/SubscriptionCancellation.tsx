@@ -61,10 +61,7 @@ export function SubscriptionCancellation({
     try {
       setCancelling(true)
       
-      const response = await api.subscription.cancel({
-        reason: selectedReason,
-        feedback: feedback
-      })
+      const response = await api.subscription.cancel()
       
       if (response?.success) {
         toast({

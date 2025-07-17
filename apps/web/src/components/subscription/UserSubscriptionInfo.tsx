@@ -11,7 +11,19 @@ import { UserIcon, CreditCardIcon, CalendarIcon } from '@heroicons/react/24/outl
 export function UserSubscriptionInfo() {
   const { isAuthReady } = useAuthenticatedApi()
   const { subscription, loading, error, getPlanDisplayName, getPlanColor, getUsagePercentage } = useSubscription()
-  const { user } = useUser()
+  const { user, isSignedIn, isLoaded } = useUser()
+
+  console.log('🔍 UserSubscriptionInfo Debug:', {
+    isAuthReady,
+    isSignedIn,
+    isLoaded,
+    subscription: !!subscription,
+    subscriptionData: subscription,
+    loading,
+    error,
+    user: !!user,
+    userEmail: user?.emailAddresses[0]?.emailAddress
+  })
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('es-ES', {
@@ -25,7 +37,7 @@ export function UserSubscriptionInfo() {
     return `${price.toFixed(2)} ${currency}/mes`
   }
 
-  if (loading) {
+  if (loading || !isLoaded) {
     return (
       <Card>
         <CardContent className="p-6">
@@ -36,6 +48,9 @@ export function UserSubscriptionInfo() {
                 <div className="h-4 bg-gray-200 rounded w-32"></div>
                 <div className="h-3 bg-gray-200 rounded w-48"></div>
               </div>
+            </div>
+            <div className="text-xs text-gray-400 text-center">
+              Cargando información de usuario y suscripción...
             </div>
           </div>
         </CardContent>
@@ -55,12 +70,30 @@ export function UserSubscriptionInfo() {
     )
   }
 
-  if (!user || !subscription) {
+  if (!isSignedIn || !user) {
     return (
       <Card>
         <CardContent className="p-6">
           <div className="text-center text-gray-500">
-            No se pudo cargar la información del usuario
+            Usuario no autenticado
+            <div className="text-xs mt-2 text-gray-400">
+              isSignedIn: {isSignedIn ? 'Sí' : 'No'} | isLoaded: {isLoaded ? 'Sí' : 'No'}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  if (!subscription) {
+    return (
+      <Card>
+        <CardContent className="p-6">
+          <div className="text-center text-gray-500">
+            No hay información de suscripción disponible
+            <div className="text-xs mt-2 text-gray-400">
+              Loading: {loading ? 'Sí' : 'No'} | Error: {error || 'Ninguno'}
+            </div>
           </div>
         </CardContent>
       </Card>

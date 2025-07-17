@@ -10,11 +10,11 @@ Se ha completado con éxito la **Fase 1** del proyecto: implementación de la in
 ## ✅ Componentes Implementados
 
 ### 🔧 Backend API
-- **Framework**: Express.js + TypeScript
-- **ORM**: Prisma con PostgreSQL + PostGIS
+- **Framework**: FastAPI + Python (migrado desde Express.js)
+- **ORM**: SQLAlchemy con PostgreSQL + PostGIS
 - **Autenticación**: Clerk integrado con middleware personalizado
-- **Arquitectura**: Estructura modular con servicios, controladores y rutas
-- **Seguridad**: Helmet, CORS, rate limiting, error handling
+- **Arquitectura**: Estructura modular con rutas especializadas
+- **Funcionalidad**: Solo validación de límites (suscripciones gestionadas por Next.js + Clerk)
 - **Estado**: ✅ **Completamente funcional**
 
 ### 🌐 Frontend Web
@@ -78,25 +78,25 @@ graph TB
 ```
 cuaderno-campo-gps/
 ├── 📁 apps/
-│   ├── 🔧 backend/          # ✅ Express.js + Prisma
-│   ├── 🌐 web/              # ✅ Next.js + Tailwind
+│   ├── 🐍 backend-python/   # ✅ FastAPI + SQLAlchemy (solo límites)
+│   ├── 🌐 web/              # ✅ Next.js + API Routes Clerk + Tailwind
 │   └── 📱 mobile/           # ✅ React Native + Expo
-├── 📁 docs/                 # ✅ Documentación completa
+├── 📁 docs/                 # ✅ Documentación actualizada
 ├── 📁 tools/                # ✅ Scripts PostGIS
-├── 🐳 docker-compose.dev.yml # ✅ Entorno desarrollo
+├── 🐳 docker-compose.*.yml  # ✅ Entornos desarrollo
 └── 📦 package.json          # ✅ Monorepo configurado
 ```
 
 ## 🎯 Funcionalidades Core Implementadas
 
-### Backend
-- [x] Servidor Express con TypeScript
+### Backend (FastAPI)
+- [x] Servidor FastAPI con Python
 - [x] Middleware de autenticación Clerk
-- [x] Rutas de API estructuradas (parcelas, actividades, auth, health)
+- [x] Endpoint de límites de suscripción
 - [x] Manejo de errores centralizado
 - [x] Configuración CORS y seguridad
-- [x] Logging estructurado con Winston
-- [x] Graceful shutdown
+- [x] Logging estructurado
+- [x] Documentación automática OpenAPI
 
 ### Base de Datos
 - [x] Schema Prisma completo (Users, Parcelas, Actividades, Productos)
@@ -107,6 +107,8 @@ cuaderno-campo-gps/
 
 ### Frontend Web
 - [x] Configuración Next.js 14 con App Router
+- [x] API Routes para integración con Clerk Subscriptions
+- [x] Sistema completo de suscripciones con datos reales
 - [x] Tema Tailwind personalizado para agricultura
 - [x] Sistema de componentes UI (Button, Card, Badge)
 - [x] Configuración de variables de entorno
@@ -277,7 +279,7 @@ cuaderno-campo-gps/
 
 **Estado actual**: ✅ **FASE 4 COMPLETADA AL 100% - SISTEMA ENTERPRISE PRODUCTION-READY**
 
-**Actualización 15 Julio 2025**: Sistema completamente migrado a FastAPI + todas las funcionalidades enterprise implementadas y validadas. El sistema está 100% listo para lanzamiento comercial con performance superior, autenticación robusta, y sistema de suscripciones completamente funcional. La arquitectura está preparada para escalamiento comercial inmediato.
+**Actualización 17 Julio 2025**: Sistema completamente implementado con arquitectura híbrida Next.js + FastAPI. El sistema de suscripciones funciona con datos reales (eliminados todos los mocks), integración Clerk completa, y UI con refresh automático. El backend Node.js ha sido eliminado, manteniendo solo FastAPI para validación de límites. La arquitectura está optimizada y lista para escalamiento comercial.
 
 ## 🆕 Nuevas Funcionalidades Fase 4 (Julio 2025)
 

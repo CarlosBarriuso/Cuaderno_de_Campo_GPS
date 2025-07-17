@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { Suspense, useState, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -10,7 +10,7 @@ import { UserSubscriptionInfo } from '@/components/subscription/UserSubscription
 import { BillingSettings } from '@/components/subscription/BillingSettings'
 import { CreditCardIcon, ChartBarIcon, CogIcon } from '@heroicons/react/24/outline'
 
-export default function SubscriptionPage() {
+function SubscriptionContent() {
   const searchParams = useSearchParams()
   const [activeTab, setActiveTab] = useState('overview')
 
@@ -66,5 +66,20 @@ export default function SubscriptionPage() {
         </TabsContent>
       </Tabs>
     </div>
+  )
+}
+
+export default function SubscriptionPage() {
+  return (
+    <Suspense fallback={
+      <div className="container mx-auto p-6 max-w-7xl">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900">Gestión de Suscripción</h1>
+          <p className="mt-2 text-gray-600">Cargando...</p>
+        </div>
+      </div>
+    }>
+      <SubscriptionContent />
+    </Suspense>
   )
 }

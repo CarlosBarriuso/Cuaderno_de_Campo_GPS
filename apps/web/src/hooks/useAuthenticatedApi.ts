@@ -25,9 +25,9 @@ export function useAuthenticatedApi() {
           console.log('🎫 Clerk token received:', token ? 'YES' : 'NO')
           
           if (token) {
-            // Para testing, usamos un token fijo
+            // Para testing, no usamos token por ahora
             // En producción, usar: api.setAuthToken(token)
-            api.setAuthToken('test-token')
+            api.setAuthToken(null)
             console.log('✅ API authentication configured with test token')
             console.log('🔗 API base URL:', process.env.NEXT_PUBLIC_API_URL)
             

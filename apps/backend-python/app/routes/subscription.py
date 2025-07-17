@@ -204,27 +204,22 @@ async def get_subscription_plan(plan_id: str):
         )
 
 
-@router.get("/current")
-async def get_current_subscription(current_user: dict = Depends(get_current_user)):
-    """Get current user's subscription status"""
+@router.get("/limits")
+async def get_subscription_limits(current_user: dict = Depends(get_current_user)):
+    """Get current user's subscription limits based on their Clerk plan"""
     
     try:
         # Get user information from Clerk
         user_id = current_user.get("id")
         user_email = current_user.get("email_addresses", [{}])[0].get("email_address")
-        user_name = current_user.get("first_name") or current_user.get("email_addresses", [{}])[0].get("email_address")
         
-        logger.info(f"Getting subscription for user: {user_id} ({user_email})")
+        # Get subscription plan from Clerk metadata
+        user_metadata = current_user.get("public_metadata", {})
+        plan_id = user_metadata.get("subscriptionPlan", "plan_free")
+        subscription_status = user_metadata.get("subscriptionStatus", "active")
         
-        # Get user's plan (mock data - in production this would come from database)
-        # For demo purposes, we'll vary the plan based on user email
-        if user_email and "premium" in user_email.lower():
-            plan_id = "plan_professional"
-        elif user_email and "enterprise" in user_email.lower():
-            plan_id = "plan_enterprise"
-        else:
-            plan_id = "plan_basic"  # Default plan
-            
+        logger.info(f"Getting limits for user: {user_id} with plan: {plan_id}")
+        
         # Find the plan details
         plan_details = None
         for plan in SUBSCRIPTION_PLANS:
@@ -233,50 +228,46 @@ async def get_current_subscription(current_user: dict = Depends(get_current_user
                 break
         
         if not plan_details:
-            plan_details = SUBSCRIPTION_PLANS[0]  # Default to first plan
+            # Default to free plan if plan not found
+            plan_details = next((plan for plan in SUBSCRIPTION_PLANS if plan["id"] == "plan_free"), SUBSCRIPTION_PLANS[0])
             
-        # Create enhanced subscription response
-        subscription_data = {
+        # TODO: Get real usage from database
+        # For now, return mock usage data
+        current_usage = {
+            "parcelas_used": 0,
+            "actividades_used": 0,
+            "storage_used_gb": 0,
+            "ocr_calls_this_month": 0,
+            "weather_calls_this_month": 0
+        }
+        
+        # Calculate usage percentages
+        usage_percentages = {
+            "parcelas": (current_usage["parcelas_used"] / plan_details["max_parcelas"] * 100) if plan_details["max_parcelas"] > 0 else 0,
+            "actividades": (current_usage["actividades_used"] / plan_details["max_actividades"] * 100) if plan_details["max_actividades"] > 0 else 0,
+            "storage": (current_usage["storage_used_gb"] / plan_details["storage_gb"] * 100),
+            "ocr": (current_usage["ocr_calls_this_month"] / plan_details["ocr_monthly_limit"] * 100) if plan_details["ocr_monthly_limit"] > 0 else 0
+        }
+        
+        limits_data = {
             "user_id": user_id,
-            "user_email": user_email,
-            "user_name": user_name,
-            "plan": plan_id,
+            "plan_id": plan_id,
             "plan_name": plan_details["name"],
-            "status": "active",
-            "max_parcelas": plan_details["max_parcelas"],
-            "max_actividades": plan_details["max_actividades"],
-            "storage_gb": plan_details["storage_gb"],
-            "ocr_monthly_limit": plan_details["ocr_monthly_limit"],
-            "weather_api_calls": plan_details["weather_api_calls"],
-            "priority_support": plan_details["priority_support"],
-            "advanced_analytics": plan_details["advanced_analytics"],
-            "export_formats": plan_details["export_formats"],
-            "current_period_start": "2025-01-15T00:00:00Z",
-            "current_period_end": "2025-02-15T00:00:00Z",
-            "cancel_at_period_end": False,
-            "trial_end": None,
-            # Legacy fields for backward compatibility
-            "hectareasLimite": plan_details["max_parcelas"],
-            "hectareasUsadas": 0,  # Would come from usage tracking
-            "precio": plan_details["price"],
-            "moneda": plan_details["currency"]
-        }
-        
-        return {
-            "success": True,
-            "data": subscription_data
-        }
-        
-    except Exception as e:
-        logger.error(f"Error getting current subscription for user {current_user.get('id')}: {e}")
-        raise HTTPException(
-            status_code=500,
-            detail={
-                "success": False,
-                "error": "Failed to get subscription status",
-                "message": str(e)
-            }
-        )
+            "status": subscription_status,
+            "limits": {
+                "max_parcelas": plan_details["max_parcelas"],
+                "max_actividades": plan_details["max_actividades"],
+                "storage_gb": plan_details["storage_gb"],
+                "ocr_monthly_limit": plan_details["ocr_monthly_limit"],
+                "weather_api_calls": plan_details["weather_api_calls"]
+            },
+            "current_usage": current_usage,
+            "usage_percentages": usage_percentages,
+            "features": {
+                "priority_support": plan_details["priority_support"],
+                "advanced_analytics": plan_details["advanced_analytics"],
+                "export_formats": plan_details["export_formats"]
+            }\n        }\n        \n        return {\n            \"success\": True,\n            \"data\": limits_data\n        }\n        \n    except Exception as e:\n        logger.error(f\"Error getting subscription limits for user {current_user.get('id')}: {e}\")\n        raise HTTPException(\n            status_code=500,\n            detail={\n                \"success\": False,\n                \"error\": \"Failed to get subscription limits\",\n                \"message\": str(e)\n            }\n        )"}, {"old_string": "@router.post(\"/upgrade\")\nasync def upgrade_subscription(\n    upgrade_request: UpgradeRequest,\n    current_user: dict = Depends(get_current_user)\n):\n    \"\"\"Upgrade user's subscription to a new plan\"\"\"\n    \n    try:\n        # Verify plan exists\n        plan = next((plan for plan in SUBSCRIPTION_PLANS if plan[\"id\"] == upgrade_request.plan_id), None)\n        \n        if not plan:\n            raise HTTPException(\n                status_code=404,\n                detail={\n                    \"success\": False,\n                    \"error\": \"Plan not found\",\n                    \"message\": f\"Subscription plan {upgrade_request.plan_id} not found\"\n                }\n            )\n        \n        # Mock upgrade response\n        # In production, this would handle payment processing\n        logger.info(f\"User {current_user.get('email')} upgrading to plan {upgrade_request.plan_id}\")\n        \n        return {\n            \"success\": True,\n            \"data\": {\n                \"message\": \"Subscription upgraded successfully\",\n                \"new_plan\": plan[\"name\"],\n                \"plan_id\": upgrade_request.plan_id,\n                \"user_id\": current_user.get(\"id\"),\n                \"effective_date\": \"2025-07-15T13:45:00Z\"\n            }\n        }\n        \n    except HTTPException:\n        raise\n    except Exception as e:\n        logger.error(f\"Error upgrading subscription for user {current_user.get('id')}: {e}\")\n        raise HTTPException(\n            status_code=500,\n            detail={\n                \"success\": False,\n                \"error\": \"Failed to upgrade subscription\",\n                \"message\": str(e)\n            }\n        )", "new_string": "# Subscription upgrade is now handled by Clerk frontend\n# This endpoint is no longer needed as Clerk manages billing"}, {"old_string": "@router.post(\"/cancel\")\nasync def cancel_subscription(current_user: dict = Depends(get_current_user)):\n    \"\"\"Cancel user's current subscription\"\"\"\n    \n    try:\n        user_id = current_user.get(\"id\")\n        user_email = current_user.get(\"email\")\n        \n        # Mock cancellation response\n        # In production, this would handle subscription cancellation\n        logger.info(f\"User {user_email} cancelling subscription\")\n        \n        return {\n            \"success\": True,\n            \"data\": {\n                \"message\": \"Subscription cancelled successfully\",\n                \"user_id\": user_id,\n                \"cancelled_at\": \"2025-07-15T13:45:00Z\",\n                \"effective_date\": \"2025-02-15T00:00:00Z\"  # End of current period\n            }\n        }\n        \n    except Exception as e:\n        logger.error(f\"Error cancelling subscription for user {current_user.get('id')}: {e}\")\n        raise HTTPException(\n            status_code=500,\n            detail={\n                \"success\": False,\n                \"error\": \"Failed to cancel subscription\",\n                \"message\": str(e)\n            }\n        )", "new_string": "# Subscription cancellation is now handled by Clerk frontend\n# This endpoint is no longer needed as Clerk manages billing"}]
 
 
 class UpgradeRequest(BaseModel):

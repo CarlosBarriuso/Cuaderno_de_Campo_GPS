@@ -33,6 +33,14 @@ interface PlanCardProps {
 export function PlanCard({ plan, currentPlan, currentPlanData, onUpgrade, isLoading }: PlanCardProps) {
   const isCurrentPlan = currentPlan === plan.id
   const isPremium = plan.price > 0
+  
+  console.log(`🃏 PlanCard for ${plan.id}:`, {
+    planId: plan.id,
+    currentPlan,
+    isCurrentPlan,
+    isLoading,
+    onUpgrade: typeof onUpgrade
+  })
 
   const formatPrice = (price: number, currency: string, interval: string) => {
     if (price === 0) return 'Gratis'
@@ -111,11 +119,23 @@ export function PlanCard({ plan, currentPlan, currentPlanData, onUpgrade, isLoad
         </div>
       </div>
 
-      <Button
-        onClick={() => onUpgrade(plan.id)}
+      <button
+        onClick={(e) => {
+          e.preventDefault()
+          console.log(`🔥 Native button clicked for plan ${plan.id}`)
+          if (!isCurrentPlan && !isLoading) {
+            console.log('🔥 Calling onUpgrade with:', plan.id)
+            onUpgrade(plan.id)
+          } else {
+            console.log('🔥 Button disabled - isCurrentPlan:', isCurrentPlan, 'isLoading:', isLoading)
+          }
+        }}
         disabled={isCurrentPlan || isLoading}
-        variant={isCurrentPlan ? 'secondary' : getPlanVariant()}
-        className="w-full"
+        className={`w-full py-2 px-4 rounded font-medium transition-colors ${
+          isCurrentPlan 
+            ? 'bg-gray-200 text-gray-600 cursor-not-allowed' 
+            : 'bg-green-600 text-white hover:bg-green-700 cursor-pointer'
+        }`}
       >
         {isLoading ? (
           'Procesando...'
@@ -124,7 +144,7 @@ export function PlanCard({ plan, currentPlan, currentPlanData, onUpgrade, isLoad
         ) : (
           `Cambiar a ${plan.name}`
         )}
-      </Button>
+      </button>
     </div>
   )
 }
