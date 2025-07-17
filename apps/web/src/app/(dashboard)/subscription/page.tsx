@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { SubscriptionOverview } from '@/components/subscription/SubscriptionOverview'
 import { PlanSelector } from '@/components/subscription/PlanSelector'
+import { ClerkPricingTable } from '@/components/subscription/ClerkPricingTable'
 import { UserSubscriptionInfo } from '@/components/subscription/UserSubscriptionInfo'
 import { BillingSettings } from '@/components/subscription/BillingSettings'
 import { CreditCardIcon, ChartBarIcon, CogIcon } from '@heroicons/react/24/outline'
@@ -58,7 +59,7 @@ function SubscriptionContent() {
         </TabsContent>
 
         <TabsContent value="plans" className="space-y-6">
-          <PlanSelector />
+          <ClerkPricingTable />
         </TabsContent>
 
         <TabsContent value="settings" className="space-y-6">

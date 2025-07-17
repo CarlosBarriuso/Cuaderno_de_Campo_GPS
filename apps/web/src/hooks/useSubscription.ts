@@ -157,12 +157,12 @@ export function useSubscription() {
       
       // Fallback to Clerk metadata if API fails
       const userMetadata = clerkUser?.publicMetadata || {}
-      const privateMetadata = clerkUser?.privateMetadata || {}
+      const privateMetadata = (clerkUser as any)?.privateMetadata || {}
       
       console.log('📋 User metadata fallback:', { userMetadata, privateMetadata })
       
-      let planId = userMetadata.subscriptionPlan || privateMetadata.subscriptionPlan || 'plan_free'
-      const subscriptionStatus = userMetadata.subscriptionStatus || privateMetadata.subscriptionStatus || 'active'
+      let planId = (userMetadata as any).subscriptionPlan || (privateMetadata as any).subscriptionPlan || 'plan_free'
+      const subscriptionStatus = (userMetadata as any).subscriptionStatus || (privateMetadata as any).subscriptionStatus || 'active'
       
       console.log('🎯 Clerk subscription plan:', planId)
       
@@ -187,8 +187,8 @@ export function useSubscription() {
         hectareasUsadas: 0, // TODO: Get real usage from our backend
         precio: planLimits.price,
         moneda: 'EUR',
-        fechaInicio: userMetadata.subscriptionStart || new Date().toISOString(),
-        fechaVencimiento: userMetadata.subscriptionEnd || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
+        fechaInicio: (userMetadata as any).subscriptionStart || new Date().toISOString(),
+        fechaVencimiento: (userMetadata as any).subscriptionEnd || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
       }
       
       console.log('🎯 Clerk subscription loaded:', clerkSubscription)

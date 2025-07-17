@@ -3,18 +3,15 @@
 import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { useAuthenticatedApi } from '@/hooks/useAuthenticatedApi'
-import { useSubscription } from '@/hooks/useSubscription'
+import { useClerkSubscription } from '@/hooks/useClerkSubscription'
 import { useUser } from '@clerk/nextjs'
 import { UserIcon, CreditCardIcon, CalendarIcon } from '@heroicons/react/24/outline'
 
 export function UserSubscriptionInfo() {
-  const { isAuthReady } = useAuthenticatedApi()
-  const { subscription, loading, error, getPlanDisplayName, getPlanColor, getUsagePercentage } = useSubscription()
+  const { subscription, loading, error } = useClerkSubscription()
   const { user, isSignedIn, isLoaded } = useUser()
 
   console.log('🔍 UserSubscriptionInfo Debug:', {
-    isAuthReady,
     isSignedIn,
     isLoaded,
     subscription: !!subscription,
@@ -129,8 +126,8 @@ export function UserSubscriptionInfo() {
               <CreditCardIcon className="h-4 w-4" />
               <span>Plan Actual</span>
             </h4>
-            <Badge className={getPlanColor(subscription.plan)}>
-              {getPlanDisplayName(subscription.plan)}
+            <Badge className={subscription.planId === 'free' ? 'bg-gray-100 text-gray-700' : 'bg-green-100 text-green-700'}>
+              {subscription.planName}
             </Badge>
           </div>
 
@@ -138,7 +135,10 @@ export function UserSubscriptionInfo() {
             <div>
               <div className="text-sm text-gray-500">Precio</div>
               <div className="font-semibold">
-                {subscription.precio ? formatPrice(subscription.precio, subscription.moneda || 'EUR') : 'Gratis'}
+                {subscription.planId === 'free' ? 'Gratis' : 
+                 subscription.planId === 'basic' ? '9.99 EUR/mes' :
+                 subscription.planId === 'professional' ? '29.99 EUR/mes' :
+                 subscription.planId === 'enterprise' ? '99.99 EUR/mes' : 'Gratis'}
               </div>
             </div>
             
@@ -154,14 +154,14 @@ export function UserSubscriptionInfo() {
             <div>
               <div className="text-sm text-gray-500">Inicio</div>
               <div className="font-semibold text-sm">
-                {subscription.fechaInicio ? formatDate(subscription.fechaInicio) : 'No disponible'}
+                {subscription.currentPeriodStart ? formatDate(subscription.currentPeriodStart.toISOString()) : 'No disponible'}
               </div>
             </div>
 
             <div>
               <div className="text-sm text-gray-500">Renovación</div>
               <div className="font-semibold text-sm">
-                {subscription.fechaVencimiento ? formatDate(subscription.fechaVencimiento) : 'No disponible'}
+                {subscription.currentPeriodEnd ? formatDate(subscription.currentPeriodEnd.toISOString()) : 'No disponible'}
               </div>
             </div>
           </div>
@@ -169,23 +169,22 @@ export function UserSubscriptionInfo() {
 
         {/* Usage Summary */}
         <div className="border-t pt-4">
-          <h4 className="font-medium mb-3">Uso de Hectáreas</h4>
+          <h4 className="font-medium mb-3">Uso de Parcelas</h4>
           <div className="space-y-2">
             <div className="flex justify-between text-sm">
               <span>Utilizadas</span>
-              <span>{subscription.hectareasUsadas || 0} / {subscription.hectareasLimite || subscription.max_parcelas || 1} parcelas</span>
+              <span>0 / {subscription.planId === 'free' ? '1' : 
+                       subscription.planId === 'basic' ? '5' :
+                       subscription.planId === 'professional' ? '25' : 'Ilimitado'} parcelas</span>
             </div>
             <div className="w-full bg-gray-200 rounded-full h-2">
               <div 
-                className={`h-2 rounded-full ${
-                  getUsagePercentage() >= 90 ? 'bg-red-500' :
-                  getUsagePercentage() >= 70 ? 'bg-yellow-500' : 'bg-green-500'
-                }`}
-                style={{ width: `${getUsagePercentage()}%` }}
+                className="h-2 rounded-full bg-green-500"
+                style={{ width: '0%' }}
               ></div>
             </div>
             <div className="text-xs text-gray-500">
-              {getUsagePercentage()}% utilizado
+              0% utilizado
             </div>
           </div>
         </div>

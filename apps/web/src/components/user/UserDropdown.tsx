@@ -2,14 +2,14 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { useUser, useClerk } from '@clerk/nextjs'
-import { useSubscription } from '@/hooks/useSubscription'
+import { useClerkSubscription } from '@/hooks/useClerkSubscription'
 import Link from 'next/link'
 import { ChevronDownIcon, CreditCardIcon, UserIcon, Cog6ToothIcon, ArrowRightOnRectangleIcon } from '@heroicons/react/24/outline'
 
 export function UserDropdown() {
   const { user } = useUser()
   const { signOut } = useClerk()
-  const { subscription, getPlanDisplayName, getPlanColor, loading } = useSubscription()
+  const { subscription, loading } = useClerkSubscription()
   const [isOpen, setIsOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
@@ -78,8 +78,8 @@ export function UserDropdown() {
                   <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">
                     Plan actual
                   </p>
-                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getPlanColor(subscription.plan)}`}>
-                    {getPlanDisplayName(subscription.plan)}
+                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${subscription.planId === 'free' ? 'bg-gray-100 text-gray-800' : 'bg-green-100 text-green-800'}`}>
+                    {subscription.planName}
                   </span>
                 </div>
                 <Link

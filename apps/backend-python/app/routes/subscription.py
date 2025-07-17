@@ -267,7 +267,24 @@ async def get_subscription_limits(current_user: dict = Depends(get_current_user)
                 "priority_support": plan_details["priority_support"],
                 "advanced_analytics": plan_details["advanced_analytics"],
                 "export_formats": plan_details["export_formats"]
-            }\n        }\n        \n        return {\n            \"success\": True,\n            \"data\": limits_data\n        }\n        \n    except Exception as e:\n        logger.error(f\"Error getting subscription limits for user {current_user.get('id')}: {e}\")\n        raise HTTPException(\n            status_code=500,\n            detail={\n                \"success\": False,\n                \"error\": \"Failed to get subscription limits\",\n                \"message\": str(e)\n            }\n        )"}, {"old_string": "@router.post(\"/upgrade\")\nasync def upgrade_subscription(\n    upgrade_request: UpgradeRequest,\n    current_user: dict = Depends(get_current_user)\n):\n    \"\"\"Upgrade user's subscription to a new plan\"\"\"\n    \n    try:\n        # Verify plan exists\n        plan = next((plan for plan in SUBSCRIPTION_PLANS if plan[\"id\"] == upgrade_request.plan_id), None)\n        \n        if not plan:\n            raise HTTPException(\n                status_code=404,\n                detail={\n                    \"success\": False,\n                    \"error\": \"Plan not found\",\n                    \"message\": f\"Subscription plan {upgrade_request.plan_id} not found\"\n                }\n            )\n        \n        # Mock upgrade response\n        # In production, this would handle payment processing\n        logger.info(f\"User {current_user.get('email')} upgrading to plan {upgrade_request.plan_id}\")\n        \n        return {\n            \"success\": True,\n            \"data\": {\n                \"message\": \"Subscription upgraded successfully\",\n                \"new_plan\": plan[\"name\"],\n                \"plan_id\": upgrade_request.plan_id,\n                \"user_id\": current_user.get(\"id\"),\n                \"effective_date\": \"2025-07-15T13:45:00Z\"\n            }\n        }\n        \n    except HTTPException:\n        raise\n    except Exception as e:\n        logger.error(f\"Error upgrading subscription for user {current_user.get('id')}: {e}\")\n        raise HTTPException(\n            status_code=500,\n            detail={\n                \"success\": False,\n                \"error\": \"Failed to upgrade subscription\",\n                \"message\": str(e)\n            }\n        )", "new_string": "# Subscription upgrade is now handled by Clerk frontend\n# This endpoint is no longer needed as Clerk manages billing"}, {"old_string": "@router.post(\"/cancel\")\nasync def cancel_subscription(current_user: dict = Depends(get_current_user)):\n    \"\"\"Cancel user's current subscription\"\"\"\n    \n    try:\n        user_id = current_user.get(\"id\")\n        user_email = current_user.get(\"email\")\n        \n        # Mock cancellation response\n        # In production, this would handle subscription cancellation\n        logger.info(f\"User {user_email} cancelling subscription\")\n        \n        return {\n            \"success\": True,\n            \"data\": {\n                \"message\": \"Subscription cancelled successfully\",\n                \"user_id\": user_id,\n                \"cancelled_at\": \"2025-07-15T13:45:00Z\",\n                \"effective_date\": \"2025-02-15T00:00:00Z\"  # End of current period\n            }\n        }\n        \n    except Exception as e:\n        logger.error(f\"Error cancelling subscription for user {current_user.get('id')}: {e}\")\n        raise HTTPException(\n            status_code=500,\n            detail={\n                \"success\": False,\n                \"error\": \"Failed to cancel subscription\",\n                \"message\": str(e)\n            }\n        )", "new_string": "# Subscription cancellation is now handled by Clerk frontend\n# This endpoint is no longer needed as Clerk manages billing"}]
+            }
+        }
+        
+        return {
+            "success": True,
+            "data": limits_data
+        }
+        
+    except Exception as e:
+        logger.error(f"Error getting subscription limits for user {current_user.get('id')}: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail={
+                "success": False,
+                "error": "Failed to get subscription limits",
+                "message": str(e)
+            }
+        )
 
 
 class UpgradeRequest(BaseModel):

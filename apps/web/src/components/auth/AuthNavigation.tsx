@@ -2,12 +2,12 @@
 
 import { SignInButton, SignUpButton, UserButton, useUser } from '@clerk/nextjs'
 import Link from 'next/link'
-import { useSubscription } from '@/hooks/useSubscription'
+import { useClerkSubscription } from '@/hooks/useClerkSubscription'
 import { UserDropdown } from '@/components/user/UserDropdown'
 
 export function AuthNavigation() {
   const { isSignedIn, user, isLoaded } = useUser()
-  const { subscription, getPlanDisplayName, getPlanColor, getPlanColorHeader, getPlanIcon, getUsagePercentage, isNearLimit } = useSubscription()
+  const { subscription, loading } = useClerkSubscription()
 
   // Show loading state while Clerk is initializing
   if (!isLoaded) {
@@ -55,13 +55,13 @@ export function AuthNavigation() {
                     title="Click para gestionar tu suscripción"
                   >
                     <div className="flex items-center space-x-2">
-                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${getPlanColorHeader(subscription.plan)} border group-hover:border-white/40`}>
-                        {getPlanIcon(subscription.plan)} {getPlanDisplayName(subscription.plan)}
+                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${subscription.planId === 'free' ? 'bg-white/20 text-white' : 'bg-white/30 text-white'} border group-hover:border-white/40`}>
+                        {subscription.planId === 'free' ? '🆓' : subscription.planId === 'basic' ? '⭐' : subscription.planId === 'professional' ? '💼' : '🏢'} {subscription.planName}
                       </span>
                       <span className="text-white/70 group-hover:text-white text-xs">→</span>
                     </div>
-                    <span className={`text-xs mt-1 ${isNearLimit() ? 'text-yellow-200' : 'text-green-100'}`}>
-                      {subscription.hectareasUsadas || 0}/{subscription.hectareasLimite || subscription.max_parcelas || 1} parcelas ({getUsagePercentage()}%)
+                    <span className="text-xs mt-1 text-green-100">
+                      0/{subscription.planId === 'free' ? '1' : subscription.planId === 'basic' ? '5' : subscription.planId === 'professional' ? '25' : 'Ilimitado'} parcelas (0%)
                     </span>
                   </Link>
                 )}

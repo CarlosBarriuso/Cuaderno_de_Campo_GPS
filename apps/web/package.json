@@ -14,6 +14,7 @@
     "test:e2e": "playwright test"
   },
   "dependencies": {
+    "@clerk/clerk-sdk-node": "^4.13.23",
     "@clerk/elements": "^0.23.42",
     "@clerk/nextjs": "^6.8.2",
     "@headlessui/react": "^2.2.0",
@@ -27,6 +28,7 @@
     "@radix-ui/react-slot": "^1.1.0",
     "@radix-ui/react-tabs": "^1.1.12",
     "@radix-ui/react-toast": "^1.2.3",
+    "@stripe/stripe-js": "^7.5.0",
     "@tanstack/react-query": "^5.61.5",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -39,7 +41,9 @@
     "react-hook-form": "^7.55.0",
     "react-leaflet": "^4.2.1",
     "recharts": "^2.13.3",
+    "stripe": "^18.3.0",
     "tailwind-merge": "^3.3.1",
+    "use-stripe-subscription": "^1.0.6",
     "zod": "^3.24.1",
     "zustand": "^5.0.2"
   },

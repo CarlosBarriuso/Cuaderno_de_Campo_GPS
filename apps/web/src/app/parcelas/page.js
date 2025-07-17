@@ -50,17 +50,14 @@ export default function ParcelasPage() {
       console.log('Enviando parcela:', data);
       
       if (editingParcela) {
-        // TODO: Actualizar parcela existente
-        // await api.parcelas.update(editingParcela.id, data);
+        // Actualizar parcela existente
+        await api.parcelas.update(editingParcela.id, data);
         console.log('Actualizando parcela:', editingParcela.id);
       } else {
-        // TODO: Crear nueva parcela
-        // await api.parcelas.create(data);
+        // Crear nueva parcela
+        await api.parcelas.create(data);
         console.log('Creando nueva parcela');
       }
-      
-      // Simular guardado exitoso
-      await new Promise(resolve => setTimeout(resolve, 1000));
       
       alert(editingParcela ? 'Parcela actualizada correctamente' : 'Parcela registrada correctamente');
       setShowForm(false);
@@ -86,8 +83,8 @@ export default function ParcelasPage() {
 
     try {
       setLoading(true);
-      // TODO: Eliminar parcela
-      // await api.parcelas.delete(parcelaId);
+      // Eliminar parcela
+      await api.parcelas.delete(parcelaId);
       console.log('Eliminando parcela:', parcelaId);
       
       alert('Parcela eliminada correctamente');
