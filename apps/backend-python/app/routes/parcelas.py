@@ -7,21 +7,109 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func
 from typing import List, Optional
 from uuid import UUID
+from datetime import datetime, date
 from loguru import logger
 
 from app.database.connection import get_async_session
 from app.models.parcela import Parcela, TipoCultivo
 from app.middleware.auth import get_current_user
+from app.services.sigpac_real import sigpac_service
 
 router = APIRouter()
+
+
+async def _enrich_with_sigpac_data(parcela_data: dict):
+    """Enriquecer datos de parcela con información real de SIGPAC"""
+    try:
+        # Buscar referencia catastral en diferentes campos
+        referencia_catastral = None
+        
+        # Verificar diferentes campos donde podría estar la referencia
+        for field in ['referencia_sigpac', 'referenciasCatastrales', 'referencias_catastrales', 'referencia_catastral']:
+            if field in parcela_data and parcela_data[field]:
+                referencia_catastral = parcela_data[field]
+                break
+        
+        if not referencia_catastral:
+            logger.info("No se encontró referencia catastral, usando datos del formulario")
+            return
+            
+        logger.info(f"🔍 Obteniendo datos reales de SIGPAC para: {referencia_catastral}")
+        
+        # Consultar datos reales de SIGPAC
+        sigpac_response = await sigpac_service.get_parcela_data(referencia_catastral)
+        
+        if sigpac_response.get('success') and sigpac_response.get('data'):
+            sigpac_data = sigpac_response['data']
+            
+            # Actualizar coordenadas con datos reales del catastro
+            if sigpac_data.get('coordenadas_centroide'):
+                coords = sigpac_data['coordenadas_centroide']
+                parcela_data['coordenadas'] = {
+                    'latitud': coords['lat'],
+                    'longitud': coords['lng']
+                }
+                logger.info(f"✅ Coordenadas actualizadas: {coords['lat']}, {coords['lng']}")
+            
+            # Actualizar superficie si está disponible
+            if sigpac_data.get('superficie') and sigpac_data['superficie'] > 0:
+                parcela_data['superficie'] = sigpac_data['superficie']
+                logger.info(f"✅ Superficie actualizada: {sigpac_data['superficie']} ha")
+            
+            # Actualizar geometría si está disponible
+            if sigpac_data.get('geometria'):
+                parcela_data['geometria_sigpac'] = sigpac_data['geometria']
+                logger.info(f"✅ Geometría SIGPAC actualizada")
+            
+            # Actualizar uso del suelo
+            if sigpac_data.get('uso_sigpac'):
+                parcela_data['uso_sigpac'] = sigpac_data['uso_sigpac']
+            
+            # Actualizar cultivo si no se especificó
+            if sigpac_data.get('cultivo') and not parcela_data.get('cultivo'):
+                parcela_data['cultivo'] = sigpac_data['cultivo']
+                
+        else:
+            logger.warning(f"No se pudieron obtener datos de SIGPAC para: {referencia_catastral}")
+            
+    except Exception as e:
+        logger.error(f"Error enriqueciendo datos con SIGPAC: {e}")
+        # No fallar la creación si SIGPAC falla, continuar con datos del formulario
+
+
+@router.get("/test")
+async def test_parcelas_no_auth(
+    db: AsyncSession = Depends(get_async_session)
+):
+    """Test endpoint without auth to debug encoding issues"""
+    try:
+        query = select(Parcela).where(Parcela.activa == True).limit(1)
+        result = await db.execute(query)
+        parcela = result.scalar_one_or_none()
+        
+        if parcela:
+            return {
+                "success": True,
+                "debug": {
+                    "id": str(parcela.id),
+                    "nombre": parcela.nombre,
+                    "superficie": float(parcela.superficie)
+                }
+            }
+        else:
+            return {"success": True, "debug": "no_parcelas"}
+    except Exception as e:
+        logger.error(f"Test endpoint error: {e}")
+        return {"success": False, "error": str(e)}
 
 
 @router.get("/")
 async def get_parcelas(
     skip: int = Query(0, ge=0),
     limit: int = Query(10, ge=1, le=100),
-    activa: Optional[bool] = Query(None),
+    activa: Optional[bool] = Query(True),  # Default to True to only show active parcelas
     tipo_cultivo: Optional[TipoCultivo] = Query(None),
+    include_deleted: bool = Query(False),  # Add explicit parameter to include deleted parcelas
     db: AsyncSession = Depends(get_async_session),
     current_user: dict = Depends(get_current_user)
 ):
@@ -31,9 +119,14 @@ async def get_parcelas(
         # Build query
         query = select(Parcela).where(Parcela.propietario_id == current_user["id"])
         
-        # Apply filters
-        if activa is not None:
-            query = query.where(Parcela.activa == activa)
+        # Apply filters - by default only show active parcelas unless explicitly requested
+        if include_deleted:
+            # If include_deleted is True, show all parcelas regardless of activa status
+            if activa is not None:
+                query = query.where(Parcela.activa == activa)
+        else:
+            # Default behavior: only show active parcelas
+            query = query.where(Parcela.activa == True)
         
         if tipo_cultivo:
             query = query.where(Parcela.tipo_cultivo == tipo_cultivo)
@@ -69,6 +162,199 @@ async def get_parcelas(
         raise HTTPException(status_code=500, detail="Error retrieving parcelas")
 
 
+@router.get("/map-data")
+async def get_map_data(
+    cultivos: Optional[List[str]] = Query(None),
+    tipos_actividad: Optional[List[str]] = Query(None),
+    fecha_desde: Optional[date] = Query(None),
+    fecha_hasta: Optional[date] = Query(None),
+    solo_con_actividad: bool = Query(False),
+    db: AsyncSession = Depends(get_async_session),
+    current_user: dict = Depends(get_current_user)
+):
+    """Get enriched parcelas data for map visualization with GeoJSON geometries"""
+    
+    try:
+        from app.models.actividad import Actividad
+        from sqlalchemy import text
+        import json
+        
+        logger.info(f"🗺️ Loading map data for user: {current_user}")
+        logger.info(f"🔍 User ID for query: {current_user['id']}")
+        
+        # First, let's check if there are any parcelas at all for debugging
+        debug_query = text("SELECT COUNT(*) as total FROM parcelas WHERE activa = true")
+        debug_result = await db.execute(debug_query)
+        total_parcelas = debug_result.scalar()
+        logger.info(f"🔍 Total active parcelas in database: {total_parcelas}")
+        
+        debug_user_query = text("SELECT COUNT(*) as total FROM parcelas WHERE propietario_id = :user_id AND activa = true")
+        debug_user_result = await db.execute(debug_user_query, {"user_id": current_user["id"]})
+        user_parcelas = debug_user_result.scalar()
+        logger.info(f"🔍 Parcelas for user {current_user['id']}: {user_parcelas}")
+        
+        # Query with GeoJSON conversion
+        map_query = text("""
+            SELECT 
+                p.id,
+                p.nombre,
+                p.superficie,
+                p.tipo_cultivo,
+                p.cultivo,
+                p.variedad,
+                p.activa,
+                p.referencia_sigpac,
+                p.referencias_catastrales,
+                ST_AsGeoJSON(p.geometria) as geometria_geojson,
+                ST_X(p.centroide) as centroide_lng,
+                ST_Y(p.centroide) as centroide_lat,
+                p.created_at,
+                p.updated_at
+            FROM parcelas p
+            WHERE p.propietario_id = :user_id 
+            AND p.activa = true
+        """)
+        
+        result = await db.execute(map_query, {"user_id": current_user["id"]})
+        parcelas_raw = result.fetchall()
+        
+        logger.info(f"📊 Found {len(parcelas_raw)} parcelas for user {current_user['id']}")
+        
+        # Build response data
+        parcelas_data = []
+        
+        for row in parcelas_raw:
+            logger.info(f"🌾 Processing parcela: {row.nombre}")
+            
+            # Parse GeoJSON geometry
+            geometria_geojson = None
+            if row.geometria_geojson:
+                try:
+                    geometria_geojson = json.loads(row.geometria_geojson)
+                    logger.info(f"✅ GeoJSON parsed for {row.nombre}")
+                except Exception as e:
+                    logger.error(f"Error parsing GeoJSON for parcela {row.nombre}: {e}")
+            else:
+                logger.warning(f"⚠️ No geometry data for parcela {row.nombre}")
+            
+            # Build centroide coordinates
+            centroide = None
+            if row.centroide_lng is not None and row.centroide_lat is not None:
+                centroide = {
+                    "lat": float(row.centroide_lat),
+                    "lng": float(row.centroide_lng)
+                }
+                logger.info(f"📍 Centroide for {row.nombre}: {centroide}")
+            else:
+                logger.warning(f"⚠️ No centroide data for parcela {row.nombre}")
+            
+            # Get last activity for this parcela
+            activity_query = select(Actividad).where(
+                Actividad.parcela_id == row.id,
+                Actividad.usuario_id == current_user["id"]
+            ).order_by(Actividad.fecha.desc()).limit(1)
+            
+            # Apply activity filters
+            if tipos_actividad:
+                activity_query = activity_query.where(Actividad.tipo.in_(tipos_actividad))
+            
+            if fecha_desde:
+                activity_query = activity_query.where(Actividad.fecha >= fecha_desde)
+                
+            if fecha_hasta:
+                activity_query = activity_query.where(Actividad.fecha <= fecha_hasta)
+            
+            activity_result = await db.execute(activity_query)
+            ultima_actividad = activity_result.scalar_one_or_none()
+            
+            # Skip parcela if solo_con_actividad is True and no activity found
+            if solo_con_actividad and not ultima_actividad:
+                continue
+            
+            # Build parcela data from row
+            parcela_dict = {
+                "id": str(row.id),
+                "nombre": row.nombre,
+                "superficie": row.superficie,
+                "tipo_cultivo": row.tipo_cultivo,
+                "cultivo": row.cultivo,
+                "variedad": row.variedad,
+                "activa": row.activa,
+                "referencia_sigpac": row.referencia_sigpac,
+                "referencias_catastrales": row.referencias_catastrales,
+                "geometria_geojson": geometria_geojson,
+                "centroide": centroide,
+                "created_at": row.created_at.isoformat() if row.created_at else None,
+                "updated_at": row.updated_at.isoformat() if row.updated_at else None
+            }
+            
+            if ultima_actividad:
+                if ultima_actividad.fecha:
+                    # Ensure both are date objects for proper subtraction
+                    fecha_actividad = ultima_actividad.fecha.date() if hasattr(ultima_actividad.fecha, 'date') else ultima_actividad.fecha
+                    dias_desde = (datetime.now().date() - fecha_actividad).days
+                else:
+                    dias_desde = None
+                parcela_dict.update({
+                    'ultima_actividad': {
+                        'id': str(ultima_actividad.id),
+                        'tipo': ultima_actividad.tipo.value,
+                        'nombre': ultima_actividad.nombre,
+                        'fecha': ultima_actividad.fecha.isoformat() if ultima_actividad.fecha else None,
+                        'dias_desde': dias_desde,
+                        'estado': ultima_actividad.estado.value if ultima_actividad.estado else None
+                    }
+                })
+            else:
+                parcela_dict['ultima_actividad'] = None
+            
+            parcelas_data.append(parcela_dict)
+        
+        # Calculate statistics
+        total_parcelas = len(parcelas_data)
+        total_superficie = sum(p.get('superficie', 0) or 0 for p in parcelas_data)
+        
+        # Group by cultivo
+        cultivos_stats = {}
+        for parcela in parcelas_data:
+            cultivo = parcela.get('tipo_cultivo')
+            if cultivo not in cultivos_stats:
+                cultivos_stats[cultivo] = {'count': 0, 'superficie': 0}
+            cultivos_stats[cultivo]['count'] += 1
+            cultivos_stats[cultivo]['superficie'] += parcela.get('superficie', 0) or 0
+        
+        # Group by last activity type
+        actividades_stats = {}
+        for parcela in parcelas_data:
+            if parcela.get('ultima_actividad'):
+                tipo = parcela['ultima_actividad']['tipo']
+                if tipo not in actividades_stats:
+                    actividades_stats[tipo] = 0
+                actividades_stats[tipo] += 1
+        
+        response = {
+            "success": True,
+            "data": parcelas_data,
+            "statistics": {
+                "total_parcelas": total_parcelas,
+                "total_superficie": round(total_superficie, 2),
+                "por_cultivo": cultivos_stats,
+                "por_ultima_actividad": actividades_stats
+            }
+        }
+        
+        logger.info(f"🚀 Returning response with {len(parcelas_data)} parcelas")
+        logger.info(f"📋 Response structure: {list(response.keys())}")
+        
+        return response
+        
+    except Exception as e:
+        logger.error(f"Error getting map data: {e}")
+        import traceback
+        logger.error(f"Traceback: {traceback.format_exc()}")
+        raise HTTPException(status_code=500, detail="Error retrieving map data")
+
+
 @router.get("/{parcela_id}")
 async def get_parcela(
     parcela_id: UUID,
@@ -101,6 +387,42 @@ async def get_parcela(
         raise HTTPException(status_code=500, detail="Error retrieving parcela")
 
 
+@router.post("/test-create")
+async def test_create_parcela(
+    parcela_data: dict,
+    db: AsyncSession = Depends(get_async_session)
+):
+    """Test endpoint to create parcela without auth"""
+    
+    try:
+        # Use a test user ID
+        parcela_data["propietario_id"] = "test-user-gustavo"
+        
+        # Enriquecer con datos reales de SIGPAC
+        await _enrich_with_sigpac_data(parcela_data)
+        
+        # Create parcela instance
+        parcela = Parcela.from_dict(parcela_data)
+        
+        # Add to database
+        db.add(parcela)
+        await db.commit()
+        await db.refresh(parcela)
+        
+        logger.info(f"Test created parcela {parcela.id} for test user")
+        
+        return {
+            "success": True,
+            "data": parcela.to_dict(),
+            "message": "Test parcela created successfully"
+        }
+        
+    except Exception as e:
+        await db.rollback()
+        logger.error(f"Error creating test parcela: {e}")
+        return {"success": False, "error": str(e)}
+
+
 @router.post("/")
 async def create_parcela(
     parcela_data: dict,
@@ -113,13 +435,23 @@ async def create_parcela(
         # Add owner information
         parcela_data["propietario_id"] = current_user["id"]
         
+        # Log incoming data for debugging
+        logger.info(f"Creating parcela with data: {parcela_data}")
+        
+        # Si hay referencia catastral, obtener coordenadas reales del SIGPAC
+        await _enrich_with_sigpac_data(parcela_data)
+        
         # Create parcela instance
         parcela = Parcela.from_dict(parcela_data)
+        logger.info(f"Parcela instance created successfully")
         
         # Add to database
         db.add(parcela)
+        logger.info(f"Parcela added to session")
         await db.commit()
+        logger.info(f"Database commit successful")
         await db.refresh(parcela)
+        logger.info(f"Parcela refreshed")
         
         logger.info(f"Created parcela {parcela.id} for user {current_user['id']}")
         
@@ -132,7 +464,11 @@ async def create_parcela(
     except Exception as e:
         await db.rollback()
         logger.error(f"Error creating parcela: {e}")
-        raise HTTPException(status_code=500, detail="Error creating parcela")
+        logger.error(f"Error type: {type(e)}")
+        logger.error(f"Error details: {str(e)}")
+        import traceback
+        logger.error(f"Traceback: {traceback.format_exc()}")
+        raise HTTPException(status_code=500, detail=f"Error creating parcela: {str(e)}")
 
 
 @router.put("/{parcela_id}")

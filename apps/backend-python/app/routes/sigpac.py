@@ -1,90 +1,55 @@
 """
 SIGPAC routes - Sistema de Información Geográfica de Parcelas Agrícolas
+REAL IMPLEMENTATION using official WFS/WMS services
 """
 
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query, Depends
 import httpx
 import re
 from loguru import logger
 from typing import Optional
+from app.services.sigpac_real import sigpac_service
+from app.middleware.auth import get_current_user
 
 router = APIRouter()
 
 
 @router.get("/parcela/{referencia}")
-async def get_parcela_sigpac(referencia: str):
-    """Get SIGPAC parcela information by reference"""
+async def get_parcela_sigpac(
+    referencia: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """Get SIGPAC parcela information by reference - REAL DATA from official services"""
     
     try:
-        # Validate SIGPAC reference format (PP:MMM:AAAA:ZZZZZ:PPPP:RR)
+        # Validate SIGPAC reference format
         if not validate_sigpac_reference(referencia):
             raise HTTPException(
                 status_code=400,
                 detail={
                     "success": False,
                     "error": "Invalid SIGPAC reference format",
-                    "message": "Reference must follow format PP:MMM:AAAA:ZZZZZ:PPPP:RR"
+                    "message": "Reference must follow format PP:MMM:AAAA:ZZZZZ:PPPP:RR or PPMMMAAAAAZZZZZPPPPRRR"
                 }
             )
         
-        # Parse reference parts
-        parts = referencia.split(":")
-        provincia = parts[0]
-        municipio = parts[1]
-        agregado = parts[2]
-        zona = parts[3]
-        poligono = parts[4] if len(parts) > 4 else None
-        parcela = parts[5] if len(parts) > 5 else None
+        # Query real SIGPAC data using WFS/WMS and Catastro
+        logger.info(f"🔍 Querying REAL SIGPAC data for: {referencia}")
+        result = await sigpac_service.get_parcela_data(referencia)
         
-        # Mock SIGPAC data for development
-        # TODO: Implement real SIGPAC WMS service integration
-        mock_data = {
-            "success": True,
-            "data": {
-                "referencia": referencia,
-                "provincia": provincia,
-                "municipio": municipio,
-                "agregado": agregado,
-                "zona": zona,
-                "poligono": poligono,
-                "parcela": parcela,
-                "superficie": 12.5,
-                "uso_sigpac": "Tierra arable",
-                "geometria": {
-                    "type": "Polygon",
-                    "coordinates": [[
-                        [-3.7038, 40.4168],
-                        [-3.7028, 40.4168],
-                        [-3.7028, 40.4158],
-                        [-3.7038, 40.4158],
-                        [-3.7038, 40.4168]
-                    ]]
-                },
-                "centroide": {
-                    "type": "Point",
-                    "coordinates": [-3.7033, 40.4163]
-                },
-                "metadata": {
-                    "fuente": "SIGPAC",
-                    "año": 2024,
-                    "precision": "alta"
-                }
-            }
-        }
-        
-        logger.info(f"Retrieved SIGPAC data for reference: {referencia}")
-        return mock_data
+        logger.info(f"✅ Real SIGPAC data retrieved for: {referencia}")
+        return result
         
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Error retrieving SIGPAC data for {referencia}: {e}")
+        logger.error(f"❌ Error retrieving real SIGPAC data for {referencia}: {e}")
         raise HTTPException(
             status_code=500,
             detail={
                 "success": False,
-                "error": "SIGPAC service error",
-                "message": "Could not retrieve parcela information"
+                "error": "SIGPAC service error", 
+                "message": f"Could not retrieve parcela information: {str(e)}"
             }
         )
 
@@ -243,10 +208,15 @@ async def validate_reference(referencia: str):
 def validate_sigpac_reference(referencia: str) -> bool:
     """Validate SIGPAC reference format"""
     
-    # Pattern: PP:MMM:AAAA:ZZZZZ:PPPP:RR
-    pattern = r'^\d{2}:\d{3}:\d{4}:\d{5}:\d{4}:[A-Z0-9]{2}$'
+    # Pattern with separators: PP:MMM:AAAA:ZZZZZ:PPPP:RR
+    pattern_with_separators = r'^\d{2}:\d{3}:[A-Z0-9]{4}:\d{5}:\d{4}:[A-Z0-9]{2}$'
     
-    return bool(re.match(pattern, referencia))
+    # Pattern without separators (SIGPAC official): PPMMMAAAAAZZZZZPPPPRRR
+    # Note: AAAA (agregado), ZZZZZ (zona), PPPP (parcela) can contain letters and numbers
+    # RR (recinto) can be 1 or 2 characters
+    pattern_without_separators = r'^\d{2}\d{3}[A-Z0-9]{4}[A-Z0-9]{5}[A-Z0-9]{4}[A-Z0-9]{1,2}$'
+    
+    return bool(re.match(pattern_with_separators, referencia) or re.match(pattern_without_separators, referencia))
 
 
 @router.get("/wms/capabilities")
